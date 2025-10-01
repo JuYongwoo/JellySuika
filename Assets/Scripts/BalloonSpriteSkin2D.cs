@@ -26,12 +26,16 @@ public class BalloonSpriteSkin2D : MonoBehaviour
     public int findNodesMaxWaitFrames = 60;
 
     [Header("Triangulation")]
-    [Tooltip("외곽을 Convex Hull로 만든 뒤 삼각형 팬으로 채웁니다. (젤리엔 권장)")]
+    [Tooltip("외곽을 Convex Hull로 만든 뒤 삼각 팬으로 채웁니다.")]
     public bool forceConvex = true;
 
-    [Header("Edge Inflate (자식 사이즈 기반 확장)")]
-    [Tooltip("자식(노드) 객체의 '사이즈(지름, 월드단위)'. 이 값의 반(=반지름)만큼 바깥으로 전체 외곽을 확장합니다. 0이면 확장 안 함.")]
-    public float childSize = 0f;
+    [Header("Edge Inflate")]
+    [Tooltip("노드별 Collider/Sprite 크기(월드)를 자동 감지하여 그 반지름만큼 외곽을 확장합니다.")]
+    public bool inflateFromChildrenSize = true;
+    [Tooltip("자동 감지 실패 시 사용할 지름(월드 단위). 0이면 미사용.")]
+    public float fallbackChildSize = 0f;
+    [Tooltip("추가로 더/덜 확장하고 싶을 때 더하는 값(월드 단위, 반경 기준에 더해짐).")]
+    public float extraInflate = 0f;
 
     MeshFilter mf;
     MeshRenderer mr;
@@ -55,7 +59,7 @@ public class BalloonSpriteSkin2D : MonoBehaviour
         {
             mesh = new Mesh { name = "BalloonSkinMesh" };
             mesh.MarkDynamic();
-            mf.sharedMesh = mesh; // 에디터에서도 안전
+            mf.sharedMesh = mesh; // 에디터/프리팹에서도 안전
         }
         EnsureMaterial();
         ApplySpriteToMaterial();
@@ -76,7 +80,7 @@ public class BalloonSpriteSkin2D : MonoBehaviour
 
     void OnValidate()
     {
-        childSize = Mathf.Max(0f, childSize);
+        fallbackChildSize = Mathf.Max(0f, fallbackChildSize);
 
         if (!mf) mf = GetComponent<MeshFilter>();
         if (!mr) mr = GetComponent<MeshRenderer>();
@@ -117,7 +121,6 @@ public class BalloonSpriteSkin2D : MonoBehaviour
             Debug.LogWarning("[BalloonSpriteSkin2D] 노드가 3개 미만입니다.");
     }
 
-    // ===== Material / Texture handling =====
 #if UNITY_EDITOR
     static bool IsPrefabAsset(GameObject go)
     {
@@ -180,12 +183,12 @@ public class BalloonSpriteSkin2D : MonoBehaviour
             mr.sortingLayerName = sortingLayer;
     }
 
-    // ===== Mesh build =====
+    // ==================== Mesh Build ====================
     void BuildMesh()
     {
         if (nodeTs.Count < 3 || mf == null) return;
 
-        // 1) 월드 좌표 수집 + centroid
+        // 1) 월드 좌표 + centroid
         vWorld.Clear();
         Vector2 c = Vector2.zero;
         for (int i = 0; i < nodeTs.Count; i++)
@@ -204,25 +207,31 @@ public class BalloonSpriteSkin2D : MonoBehaviour
             return Mathf.Atan2(da.y, da.x).CompareTo(Mathf.Atan2(db.y, db.x));
         });
 
-        // 3) ***자식 사이즈 기반 외곽 확장*** (요청사항)
-        float inflate = Mathf.Max(0f, childSize) * 0.5f;  // 반(반지름)만큼
+        // 3) 노드별 크기로 외곽 확장
         vWorldInflated.Clear();
-        if (inflate > 1e-6f)
+        for (int i = 0; i < vWorld.Count; i++)
         {
-            for (int i = 0; i < vWorld.Count; i++)
-            {
-                Vector2 to = (Vector2)vWorld[i] - c;
-                float d = to.magnitude;
-                Vector2 dir = (d > 1e-8f) ? (to / d) : Vector2.up; // 중심과 동일해도 안전
-                vWorldInflated.Add((Vector2)vWorld[i] + dir * inflate);
-            }
-        }
-        else
-        {
-            vWorldInflated.AddRange(vWorld);
+            Transform t = nodeTs[i]; // nodeTs와 vWorld는 같은 순서가 아닐 수 있으므로 안전하게 다시 찾기
+            // 각도 정렬 후 index가 뒤섞였을 수 있으니, 가장 가까운 노드를 맵핑
+            t = FindClosestNodeTransform(vWorld[i]);
+
+            float inflateR = 0f;
+            if (inflateFromChildrenSize)
+                inflateR = GetNodeRadiusWorld(t);
+
+            if (inflateR <= 0f && fallbackChildSize > 0f)
+                inflateR = fallbackChildSize * 0.5f;
+
+            inflateR += extraInflate;
+
+            Vector2 to = (Vector2)vWorld[i] - c;
+            float d = to.magnitude;
+            Vector2 dir = (d > 1e-8f) ? (to / d) : Vector2.up;
+
+            vWorldInflated.Add((Vector2)vWorld[i] + dir * Mathf.Max(0f, inflateR));
         }
 
-        // 4) 외곽 안정화 (Convex 권장)
+        // 4) 외곽 안정화
         List<Vector3> poly = forceConvex ? ComputeConvexHull(vWorldInflated)
                                          : CleanPolygon(vWorldInflated, 1e-5f, 1e-6f);
         if (poly.Count < 3) return;
@@ -289,7 +298,75 @@ public class BalloonSpriteSkin2D : MonoBehaviour
         mesh.RecalculateNormals();
     }
 
-    // ===== Utils =====
+    // ==================== Helpers ====================
+    Transform FindClosestNodeTransform(Vector3 worldPos)
+    {
+        Transform best = nodeTs[0];
+        float bestSqr = float.PositiveInfinity;
+        for (int i = 0; i < nodeTs.Count; i++)
+        {
+            float d = ((Vector2)(nodeTs[i].position) - (Vector2)worldPos).sqrMagnitude;
+            if (d < bestSqr) { bestSqr = d; best = nodeTs[i]; }
+        }
+        return best;
+    }
+
+    // 노드의 "월드 반지름" 추정
+    float GetNodeRadiusWorld(Transform t)
+    {
+        if (t == null) return 0f;
+
+        // 1) 원형 콜라이더
+        var cc = t.GetComponent<CircleCollider2D>();
+        if (cc)
+        {
+            float s = MaxAbs2D(t.lossyScale);
+            return Mathf.Abs(cc.radius * s);
+        }
+
+        // 2) 박스 콜라이더
+        var bc = t.GetComponent<BoxCollider2D>();
+        if (bc)
+        {
+            Vector3 s = Abs2D(t.lossyScale);
+            float w = Mathf.Abs(bc.size.x * s.x);
+            float h = Mathf.Abs(bc.size.y * s.y);
+            return 0.5f * Mathf.Max(w, h);
+        }
+
+        // 3) 캡슐 콜라이더
+        var cap = t.GetComponent<CapsuleCollider2D>();
+        if (cap)
+        {
+            Vector3 s = Abs2D(t.lossyScale);
+            float w = Mathf.Abs(cap.size.x * s.x);
+            float h = Mathf.Abs(cap.size.y * s.y);
+            return 0.5f * Mathf.Max(w, h);
+        }
+
+        // 4) 폴리곤/엣지 콜라이더: Bounds 사용
+        var pc = t.GetComponent<Collider2D>();
+        if (pc)
+        {
+            var e = pc.bounds.extents; // 이미 월드
+            return Mathf.Max(e.x, e.y);
+        }
+
+        // 5) 스프라이트 렌더러
+        var sr = t.GetComponent<SpriteRenderer>();
+        if (sr && sr.sprite != null)
+        {
+            var e = sr.bounds.extents; // 월드
+            return Mathf.Max(e.x, e.y);
+        }
+
+        // 6) 실패 시 0
+        return 0f;
+    }
+
+    static float MaxAbs2D(Vector3 v) => Mathf.Max(Mathf.Abs(v.x), Mathf.Abs(v.y));
+    static Vector3 Abs2D(Vector3 v) => new(Mathf.Abs(v.x), Mathf.Abs(v.y), 1f);
+
     static List<Vector3> ComputeConvexHull(List<Vector3> pts)
     {
         var p = new List<Vector2>(pts.Count);
@@ -429,7 +506,6 @@ public class BalloonSpriteSkin2D : MonoBehaviour
 
             if (!earFound)
             {
-                // 안전망: 남은 것을 팬으로
                 TriangulateConvexFan(V.Count, outIndices);
                 break;
             }
