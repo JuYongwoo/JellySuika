@@ -3,8 +3,8 @@ using UnityEngine;
 public class ManagerObject : MonoBehaviour
 {
     public static ManagerObject instance;
-    public InputManager inputManager;
-    public ResourceManager resourceManager;
+    public InputManager inputManager = new InputManager();
+    public ResourceManager resourceManager = new ResourceManager();
 
     private void Awake()
     {
@@ -18,9 +18,6 @@ public class ManagerObject : MonoBehaviour
             Destroy(gameObject);
         }
             DontDestroyOnLoad(gameObject);
-
-
-
 
 
 
