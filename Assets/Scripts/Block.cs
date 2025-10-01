@@ -88,7 +88,10 @@ public class WaterBalloon2D : MonoBehaviour
         { if (c.transform.root != balloonRoot && externalContacts <= 0) externalContacts = 1; }
     }
 
-    void Start() => Build();
+    void Awake()                 // ★여기로 이동
+    {
+        Build();
+    }
 
     public void Build()
     {

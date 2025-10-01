@@ -9,7 +9,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6811219128890141006}
+  - component: {fileID: -5048148902508281964}
   - component: {fileID: 966236855163982634}
+  - component: {fileID: 1549950860481711729}
+  - component: {fileID: -2087326421501818888}
   m_Layer: 0
   m_Name: Apple
   m_TagString: Untagged
@@ -32,6 +35,14 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!33 &-5048148902508281964
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7058974067128140919}
+  m_Mesh: {fileID: 0}
 --- !u!114 &966236855163982634
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -45,18 +56,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   nodePrefab: {fileID: 6245279223952659903, guid: 87ffe25b06162b94f851785a7bc9c53e, type: 3}
-  nodeCount: 64
+  nodeCount: 32
   usePrefabRadius: 1
   radius: 1
   ignoreSelfCollision: 1
   addShear: 1
   edgeFrequency: 12
   edgeDamping: 0.6
-  shearFrequency: 8
+  shearFrequency: 12.96
   shearDamping: 0.6
   pressureStiffness: 40
   pressureDamping: 0.2
   minRadiusFactor: 0.6
+  maxRadiusFactor: 1.25
+  softMaxClamp: 1
+  maxClampStiffness: 60
+  maxClampDamping: 0.3
   cancelHorizontalDriftWhenIdle: 1
   driftCancelStrength: 0.35
   idleAreaErrorEpsilon: 0.02
@@ -64,3 +79,72 @@ MonoBehaviour:
   gravityScale: 1
   linearDrag: 0.1
   angularDrag: 0.05
+--- !u!23 &1549950860481711729
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7058974067128140919}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 0}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &-2087326421501818888
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7058974067128140919}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68928cf5eb1d54649a7871828161e3c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sprite: {fileID: 6474595345939185752, guid: fd0898def9ef83a4ca51c139759b6ca1, type: 3}
+  autoCreateMaterial: 1
+  shaderName: Sprites/Default
+  sortingLayer: 
+  sortingOrder: 0
+  uvPadding: 0.02
+  useSpriteRect: 1
+  autoFindNodes: 1
+  rebuildEveryFrame: 1
+  findNodesMaxWaitFrames: 60
+  forceConvex: 1
+  childSize: 1

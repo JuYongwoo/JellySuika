@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6811219128890141006}
   - component: {fileID: 966236855163982634}
   m_Layer: 0
-  m_Name: Grape
+  m_Name: Strawberry
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -44,10 +44,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c75945180194c204bba432e5a94dd3bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nodePrefab: {fileID: 6245279223952659903, guid: a9e269338bdec5746a21e28d9430d7b6, type: 3}
-  nodeCount: 32
+  nodePrefab: {fileID: 6245279223952659903, guid: 023a830430bf81245b6d56c87f85190a, type: 3}
+  nodeCount: 12
   usePrefabRadius: 1
-  radius: 0.75
+  radius: 0.3
   ignoreSelfCollision: 1
   addShear: 1
   edgeFrequency: 12
