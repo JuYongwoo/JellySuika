@@ -2,10 +2,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 2D 물풍선: 다수의 노드(Rigidbody2D) + 막(스프링) + 내부 압력(면적 보존, 반지름 방향) + 최소반경 클램프
-/// - 중앙 노드/조인트 없음
-/// - 노드끼리 충돌 기본 무시(월드와는 충돌)
-/// - 드리프트 방지: 압력을 반지름 방향으로 적용(합력이 0), 아이들 상태에서 수평 COM 드리프트 소거
+/// 2D 물풍선: 다수의 노드(Rigidbody2D) + 막(스프링) + 내부 압력(면적 보존, 반지름 방향)
+/// + 최소/최대 반경 클램프(퍼짐/찌그러짐 상한·하한)
+/// - 중앙 조인트 없음, 노드끼리 충돌은 기본 무시(월드와는 충돌)
+/// - 드리프트 방지: 압력을 반지름 방향으로 적용(합력 ≈ 0), 아이들에서 수평 COM 드리프트 소거
 /// </summary>
 [DisallowMultipleComponent]
 public class WaterBalloon2D : MonoBehaviour
@@ -37,8 +37,18 @@ public class WaterBalloon2D : MonoBehaviour
     [Tooltip("반경 방향 속도 감쇠 (출렁임 제어)")]
     [Range(0f, 2f)] public float pressureDamping = 0.2f;
 
+    [Header("Clamp (min/max spread)")]
     [Tooltip("중심에서 최소 허용 반경 비율 (0.55~0.65 권장)")]
     [Range(0.1f, 0.95f)] public float minRadiusFactor = 0.6f;
+
+    [Tooltip("중심에서 최대 허용 반경 비율 (1.0=초기크기, 1.3=30% 팽창 허용)")]
+    [Range(1.0f, 5f)] public float maxRadiusFactor = 1.25f;
+
+    [Tooltip("최대 반경을 넘을 때 즉시 자르는 대신 부드럽게 되밀기")]
+    public bool softMaxClamp = true;
+    [Tooltip("소프트 최대 클램프 반발력 계수")]
+    public float maxClampStiffness = 60f;
+    [Range(0f, 1f)] public float maxClampDamping = 0.3f;
 
     [Header("Drift Kill (idle only)")]
     [Tooltip("외부 접촉 없고 압력 에러가 작을 때 수평 COM 드리프트 제거")]
@@ -60,6 +70,8 @@ public class WaterBalloon2D : MonoBehaviour
     private readonly List<NodeSensor> sensors = new();
     private float targetArea;
     private float minRadius;
+    private float maxRadius;   // ★ 추가: 최대 퍼짐 반경
+    private float initialRadius;
 
     private class NodeSensor : MonoBehaviour
     {
@@ -67,23 +79,16 @@ public class WaterBalloon2D : MonoBehaviour
         public int externalContacts;
 
         void OnCollisionEnter2D(Collision2D c)
-        {
-            if (c.transform.root != balloonRoot) externalContacts++;
-        }
+        { if (c.transform.root != balloonRoot) externalContacts++; }
+
         void OnCollisionExit2D(Collision2D c)
-        {
-            if (c.transform.root != balloonRoot) externalContacts = Mathf.Max(0, externalContacts - 1);
-        }
+        { if (c.transform.root != balloonRoot) externalContacts = Mathf.Max(0, externalContacts - 1); }
+
         void OnCollisionStay2D(Collision2D c)
-        {
-            if (c.transform.root != balloonRoot && externalContacts <= 0) externalContacts = 1;
-        }
+        { if (c.transform.root != balloonRoot && externalContacts <= 0) externalContacts = 1; }
     }
 
-    void Start()
-    {
-        Build();
-    }
+    void Start() => Build();
 
     public void Build()
     {
@@ -99,7 +104,9 @@ public class WaterBalloon2D : MonoBehaviour
 
         float R = usePrefabRadius ? Mathf.Max(0.001f, GetPrefabRadius(nodePrefab))
                                   : Mathf.Max(0.001f, radius);
+        initialRadius = R;
         minRadius = R * minRadiusFactor;
+        maxRadius = R * Mathf.Max(1.0f, maxRadiusFactor); // ★ 최대 반경 계산
 
         // place nodes on a perfect circle (CCW)
         for (int i = 0; i < nodeCount; i++)
@@ -116,8 +123,8 @@ public class WaterBalloon2D : MonoBehaviour
             if (rb == null) rb = go.AddComponent<Rigidbody2D>();
             rb.mass = nodeMass;
             rb.gravityScale = gravityScale;
-            rb.linearDamping = linearDrag;
-            rb.angularDamping = angularDrag;
+            rb.linearDamping = linearDrag;   // 프로젝트 버전에 따라 drag 사용
+            rb.angularDamping = angularDrag; // (기존 코드와 동일)
             rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
             rb.interpolation = RigidbodyInterpolation2D.Interpolate;
             rb.freezeRotation = true;
@@ -208,7 +215,7 @@ public class WaterBalloon2D : MonoBehaviour
             float d = to.magnitude;
             Vector2 dir = (d > 1e-6f) ? (to / Mathf.Max(d, 1e-6f)) : Random.insideUnitCircle.normalized;
 
-            // radial pressure (합력 0: Σ(p_i - c) = 0 by definition)
+            // radial pressure (합력≈0)
             rb.AddForce(dir * kPressure, ForceMode2D.Force);
 
             // radial velocity damping
@@ -228,13 +235,44 @@ public class WaterBalloon2D : MonoBehaviour
             if (d < minRadius)
             {
                 Vector2 dir = (d > 1e-6f) ? (to / d) : Random.insideUnitCircle.normalized;
-                // position push-out
-                rb.position = c + dir * minRadius;
-                // kill inward radial velocity
-                float inward = Vector2.Dot(rb.linearVelocity, -dir);
+                rb.position = c + dir * minRadius;           // 위치 푸시-아웃
+                float inward = Vector2.Dot(rb.linearVelocity, -dir); // 안쪽 성분 제거
                 if (inward > 0f) rb.linearVelocity += dir * inward;
             }
         }
+
+        // ---- Maximum radius clamp (limit spread) ★ 추가 ----
+        for (int i = 0; i < rbs.Count; i++)
+        {
+            Rigidbody2D rb = rbs[i];
+            Vector2 to = rb.position - c;
+            float d = to.magnitude;
+
+            if (d > maxRadius)
+            {
+                Vector2 dir = (d > 1e-6f) ? (to / d) : Random.insideUnitCircle.normalized;
+
+                if (softMaxClamp)
+                {
+                    // 소프트: 넘친 양 만큼 안쪽으로 당기는 힘 + 바깥 성분 감쇠
+                    float excess = d - maxRadius;
+                    rb.AddForce(-dir * (excess * Mathf.Max(0f, maxClampStiffness)), ForceMode2D.Force);
+
+                    float outward = Vector2.Dot(rb.linearVelocity, dir);
+                    if (outward > 0f)
+                        rb.linearVelocity -= dir * (outward * Mathf.Clamp01(maxClampDamping));
+                }
+                else
+                {
+                    // 하드: 바로 잘라내고 바깥 성분 제거
+                    rb.position = c + dir * maxRadius;
+                    float outward = Vector2.Dot(rb.linearVelocity, dir);
+                    if (outward > 0f) rb.linearVelocity -= dir * outward;
+                }
+            }
+        }
+
+        // ---- Cancel horizontal COM
 
         // ---- Cancel horizontal COM drift when truly idle (no contact, small area error) ----
         if (cancelHorizontalDriftWhenIdle)
