@@ -1,391 +1,279 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// 2D 물풍선: 다수의 노드(Rigidbody2D) + 막(스프링) + 내부 압력(면적 보존, 반지름 방향) + 최소반경 클램프
+/// - 중앙 노드/조인트 없음
+/// - 노드끼리 충돌 기본 무시(월드와는 충돌)
+/// - 드리프트 방지: 압력을 반지름 방향으로 적용(합력이 0), 아이들 상태에서 수평 COM 드리프트 소거
+/// </summary>
 [DisallowMultipleComponent]
-public class NodeRingStable : MonoBehaviour
+public class WaterBalloon2D : MonoBehaviour
 {
-    public enum AnchorMode { ParentDynamic, FixedWorldAnchor }
-    public enum CompressionMode { SoftForce, HardSnap }
-
-    [Header("Prefab & Count")]
+    [Header("Nodes")]
     public GameObject nodePrefab;
-    [Min(3)] public int nodeCount = 32;
+    [Range(8, 128)] public int nodeCount = 32;
+    [Tooltip("프리팹 크기로 초기 반지름 추정(권장)")]
+    public bool usePrefabRadius = true;
+    [Tooltip("usePrefabRadius=false일 때만 사용")]
+    public float radius = 0.5f;
 
-    [Header("Anchor & Springs")]
-    public AnchorMode anchorMode = AnchorMode.ParentDynamic;
-    public bool attachSprings = true;
+    [Tooltip("노드끼리 충돌 무시 (월드와는 충돌)")]
+    public bool ignoreSelfCollision = true;
 
-    [Header("Placement")]
-    [Tooltip("center -> node center distance = prefab radius")]
-    public bool usePrefabRadiusAsPlacement = true;
+    [Header("Membrane (edge springs)")]
+    public bool addShear = true;
+    [Tooltip("가장자리 스프링 주파수 (10~14 젤리 느낌)")]
+    public float edgeFrequency = 12f;
+    [Range(0f, 1f)] public float edgeDamping = 0.6f;
 
-    [Header("Spring tuning (stable defaults)")]
-    [Tooltip("너무 높으면 진동 발생. 안정성 우선값 권장: edge 30~80")]
-    public float edgeFrequency = 40f;
-    [Range(0f, 1f)] public float edgeDamping = 0.35f;
-    [Tooltip("radial(중심) 스프링 주파수")]
-    public float radialFrequency = 30f;
-    [Range(0f, 1f)] public float radialDamping = 0.4f;
+    [Tooltip("대각(이웃의 이웃) 스프링 주파수")]
+    public float shearFrequency = 8f;
+    [Range(0f, 1f)] public float shearDamping = 0.6f;
 
-    [Header("Node physics")]
-    public float nodeMass = 0.03f;
-    public float nodeGravity = 1f;
-    public bool preventSleeping = false;
-    [Tooltip("노드끼리 충돌 허용 => 서로 밀리며 겹침 줄임 (비용 증가)")]
-    public bool allowNodeToNodeCollision = false;
+    [Header("Internal Pressure / Area Preserve (radial)")]
+    [Tooltip("면적 오차 비율 → 압력 크기(30~60 권장)")]
+    public float pressureStiffness = 40f;
+    [Tooltip("반경 방향 속도 감쇠 (출렁임 제어)")]
+    [Range(0f, 2f)] public float pressureDamping = 0.2f;
 
-    [Header("Compression / Clamping")]
-    [Range(0f, 0.9f)]
-    public float maxCompression = 0.35f;
-    public CompressionMode compressionMode = CompressionMode.SoftForce;
-    public float compressionRestoreStrength = 0.06f;
-    [Range(0f, 1f)]
-    public float hardSnapDampenVelocity = 0.6f;
+    [Tooltip("중심에서 최소 허용 반경 비율 (0.55~0.65 권장)")]
+    [Range(0.1f, 0.95f)] public float minRadiusFactor = 0.6f;
 
-    [Header("Stabilization (new)")]
-    [Tooltip("FixedUpdate에서 노드 속도를 곱해 감쇠시키는 계수 (0.9~0.999)")]
-    [Range(0.8f, 0.999f)] public float velocityDampingFactor = 0.96f;
-    [Tooltip("노드 속도 절대 최대값(클램프)")]
-    public float maxNodeSpeed = 12f;
-    [Tooltip("중심 안정화: 평균 노드 중심과 transform.position 차이를 보정하는 힘")]
-    public bool stabilizeCenter = true;
-    [Tooltip("클수록 중심이 빠르게 복원 (권장 1~30)")]
-    public float centerStabilizeStrength = 6f;
+    [Header("Drift Kill (idle only)")]
+    [Tooltip("외부 접촉 없고 압력 에러가 작을 때 수평 COM 드리프트 제거")]
+    public bool cancelHorizontalDriftWhenIdle = true;
+    [Tooltip("드리프트 제거 강도 (1=즉시 제거, 0.2~0.5 권장)")]
+    [Range(0f, 1f)] public float driftCancelStrength = 0.35f;
+    [Tooltip("아이들 판정: |areaErrorRatio| < 이 값")]
+    public float idleAreaErrorEpsilon = 0.02f;
 
-    [Header("Auto hard-snap behavior")]
-    public float autoHardSnapTriggerFactor = 0.8f; // meanRadius < minAllowed * factor => force hard snap
-    public float hardSnapCooldown = 0.5f;
+    [Header("Node Rigidbodies")]
+    public float nodeMass = 0.05f;
+    public float gravityScale = 1f;
+    public float linearDrag = 0.1f;
+    public float angularDrag = 0.05f;
 
-    [Header("Misc")]
-    public bool reuseExistingChildren = true;
-    public float initialImpulse = 0f;
+    // Internals
+    private readonly List<Rigidbody2D> rbs = new();
+    private readonly List<Collider2D> cols = new();
+    private readonly List<NodeSensor> sensors = new();
+    private float targetArea;
+    private float minRadius;
 
-    // internals
-    private List<GameObject> nodes = new List<GameObject>();
-    private List<Collider2D> nodeColliders = new List<Collider2D>();
-    private float desiredRadius = 0.5f;
-    private float minAllowedRadius = 0.2f;
-    private bool hardSnapLocked = false;
+    private class NodeSensor : MonoBehaviour
+    {
+        public Transform balloonRoot;
+        public int externalContacts;
+
+        void OnCollisionEnter2D(Collision2D c)
+        {
+            if (c.transform.root != balloonRoot) externalContacts++;
+        }
+        void OnCollisionExit2D(Collision2D c)
+        {
+            if (c.transform.root != balloonRoot) externalContacts = Mathf.Max(0, externalContacts - 1);
+        }
+        void OnCollisionStay2D(Collision2D c)
+        {
+            if (c.transform.root != balloonRoot && externalContacts <= 0) externalContacts = 1;
+        }
+    }
 
     void Start()
     {
-        BuildRing();
-        if (initialImpulse != 0f) ApplyInitialImpulse(initialImpulse);
+        Build();
     }
 
-    public void BuildRing()
+    public void Build()
     {
+        // cleanup
+        for (int i = transform.childCount - 1; i >= 0; i--) Destroy(transform.GetChild(i).gameObject);
+        rbs.Clear(); cols.Clear(); sensors.Clear();
+
         if (nodePrefab == null)
         {
-            Debug.LogError("[NodeRingStable] nodePrefab is null.");
+            Debug.LogError("[WaterBalloon2D] nodePrefab missing");
             return;
         }
-        if (nodeCount < 3) nodeCount = 3;
 
-        // 부모 Rigidbody 설정
-        Rigidbody2D parentRb = GetComponent<Rigidbody2D>();
-        if (anchorMode == AnchorMode.ParentDynamic)
-        {
-            if (parentRb == null) parentRb = gameObject.AddComponent<Rigidbody2D>();
-            parentRb.bodyType = RigidbodyType2D.Dynamic;
-            parentRb.gravityScale = nodeGravity;
-            parentRb.interpolation = RigidbodyInterpolation2D.Interpolate;
-            parentRb.sleepMode = RigidbodySleepMode2D.StartAwake;
-        }
-        else
-        {
-            if (parentRb != null)
-            {
-                parentRb.bodyType = RigidbodyType2D.Kinematic;
-                parentRb.gravityScale = 0f;
-                parentRb.linearVelocity = Vector2.zero;
-                parentRb.angularVelocity = 0f;
-            }
-        }
+        float R = usePrefabRadius ? Mathf.Max(0.001f, GetPrefabRadius(nodePrefab))
+                                  : Mathf.Max(0.001f, radius);
+        minRadius = R * minRadiusFactor;
 
-        // prefab radius
-        float prefabRadius = GetPrefabRadius(nodePrefab);
-        if (prefabRadius <= 0f) prefabRadius = 0.5f;
-        desiredRadius = usePrefabRadiusAsPlacement ? prefabRadius : prefabRadius;
-
-        minAllowedRadius = desiredRadius * (1f - Mathf.Clamp01(maxCompression));
-
-        // reuse/create
-        nodes.Clear();
-        nodeColliders.Clear();
-        List<GameObject> existingChildren = new List<GameObject>();
-        for (int i = 0; i < transform.childCount; i++) existingChildren.Add(transform.GetChild(i).gameObject);
-
-        int reuseCount = 0;
-        if (reuseExistingChildren)
-        {
-            reuseCount = Mathf.Min(existingChildren.Count, nodeCount);
-            for (int i = 0; i < reuseCount; i++)
-            {
-                GameObject child = existingChildren[i];
-                child.SetActive(true);
-                EnsureNodePhysics(child);
-                Collider2D col = child.GetComponent<Collider2D>();
-                if (col == null) col = child.AddComponent<CircleCollider2D>();
-                nodes.Add(child);
-                nodeColliders.Add(col);
-            }
-        }
-
-        for (int i = reuseCount; i < nodeCount; i++)
-        {
-            GameObject inst = Instantiate(nodePrefab, transform);
-            inst.name = nodePrefab.name + "_node_" + i;
-            EnsureNodePhysics(inst);
-            Collider2D col = inst.GetComponent<Collider2D>();
-            if (col == null) col = inst.AddComponent<CircleCollider2D>();
-            nodes.Add(inst);
-            nodeColliders.Add(col);
-        }
-
-        // disable extras
-        for (int i = nodeCount; i < existingChildren.Count; i++) existingChildren[i].SetActive(false);
-
-        // position nodes
-        double angleStep = 2.0 * Mathf.PI / nodeCount;
+        // place nodes on a perfect circle (CCW)
         for (int i = 0; i < nodeCount; i++)
         {
-            double angle = i * angleStep;
-            double x = System.Math.Cos(angle) * desiredRadius;
-            double y = System.Math.Sin(angle) * desiredRadius;
-            nodes[i].transform.localPosition = new Vector3((float)x, (float)y, 0f);
-            nodes[i].transform.localRotation = Quaternion.identity;
+            float ang = (i / (float)nodeCount) * Mathf.PI * 2f; // 0..2π
+            Vector2 local = new(Mathf.Cos(ang) * R, Mathf.Sin(ang) * R);
+
+            var go = Instantiate(nodePrefab, transform);
+            go.name = $"node_{i}";
+            go.transform.localPosition = local;
+            go.transform.localRotation = Quaternion.identity;
+
+            var rb = go.GetComponent<Rigidbody2D>();
+            if (rb == null) rb = go.AddComponent<Rigidbody2D>();
+            rb.mass = nodeMass;
+            rb.gravityScale = gravityScale;
+            rb.linearDamping = linearDrag;
+            rb.angularDamping = angularDrag;
+            rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+            rb.interpolation = RigidbodyInterpolation2D.Interpolate;
+            rb.freezeRotation = true;
+
+            var col = go.GetComponent<Collider2D>();
+            if (col == null) col = go.AddComponent<CircleCollider2D>();
+
+            var sensor = go.AddComponent<NodeSensor>();
+            sensor.balloonRoot = transform.root;
+
+            rbs.Add(rb);
+            cols.Add(col);
+            sensors.Add(sensor);
         }
 
-        // collisions among nodes
-        if (!allowNodeToNodeCollision)
+        // ignore self collisions (world with nodes still collides)
+        if (ignoreSelfCollision)
         {
-            for (int i = 0; i < nodeColliders.Count; i++)
-                for (int j = i + 1; j < nodeColliders.Count; j++)
-                    if (nodeColliders[i] != null && nodeColliders[j] != null)
-                        Physics2D.IgnoreCollision(nodeColliders[i], nodeColliders[j], true);
-        }
-        else
-        {
-            // ensure collisions are not ignored
-            for (int i = 0; i < nodeColliders.Count; i++)
-                for (int j = i + 1; j < nodeColliders.Count; j++)
-                    if (nodeColliders[i] != null && nodeColliders[j] != null)
-                        Physics2D.IgnoreCollision(nodeColliders[i], nodeColliders[j], false);
+            for (int i = 0; i < cols.Count; i++)
+                for (int j = i + 1; j < cols.Count; j++)
+                    if (cols[i] && cols[j]) Physics2D.IgnoreCollision(cols[i], cols[j], true);
         }
 
-        // remove old springs
-        foreach (var n in nodes)
-            foreach (var j in n.GetComponents<SpringJoint2D>()) DestroyImmediate(j);
-
-        // attach springs
-        if (attachSprings)
+        // membrane springs (edges + optional shear)
+        for (int i = 0; i < nodeCount; i++)
         {
-            float chord = 2f * desiredRadius * Mathf.Sin(Mathf.PI / nodeCount);
-            Vector2 parentWorldPos = transform.position;
-            Rigidbody2D parentBody = GetComponent<Rigidbody2D>();
+            int j = (i + 1) % nodeCount;
+            AddSpring(rbs[i], rbs[j], edgeFrequency, edgeDamping);
 
-            for (int i = 0; i < nodeCount; i++)
+            if (addShear)
             {
-                GameObject a = nodes[i];
-                GameObject b = nodes[(i + 1) % nodeCount];
-
-                SpringJoint2D edge = a.AddComponent<SpringJoint2D>();
-                edge.autoConfigureDistance = false;
-                edge.connectedBody = b.GetComponent<Rigidbody2D>();
-                edge.distance = chord;
-                edge.frequency = Mathf.Max(0.01f, edgeFrequency);
-                edge.dampingRatio = Mathf.Clamp01(edgeDamping);
-                edge.enableCollision = false;
-
-                SpringJoint2D radial = a.AddComponent<SpringJoint2D>();
-                radial.autoConfigureDistance = false;
-                if (anchorMode == AnchorMode.ParentDynamic && parentBody != null)
-                {
-                    radial.connectedBody = parentBody;
-                    radial.distance = desiredRadius;
-                }
-                else
-                {
-                    radial.connectedBody = null;
-                    radial.connectedAnchor = parentWorldPos;
-                    radial.distance = desiredRadius;
-                }
-                radial.frequency = Mathf.Max(0.01f, radialFrequency);
-                radial.dampingRatio = Mathf.Clamp01(radialDamping);
-                radial.enableCollision = false;
+                int k = (i + 2) % nodeCount;
+                AddSpring(rbs[i], rbs[k], shearFrequency, shearDamping);
             }
         }
 
-        Debug.Log($"[NodeRingStable] Built ring. desiredRadius={desiredRadius:F3}, minAllowedRadius={minAllowedRadius:F3}, nodes={nodeCount}");
+        // target area = initial polygon area (abs)
+        targetArea = Mathf.Abs(PolygonAreaWorldAbs());
     }
 
-    void EnsureNodePhysics(GameObject go)
+    void AddSpring(Rigidbody2D a, Rigidbody2D b, float freq, float damp)
     {
-        Rigidbody2D rb = go.GetComponent<Rigidbody2D>();
-        if (rb == null) rb = go.AddComponent<Rigidbody2D>();
-        rb.bodyType = RigidbodyType2D.Dynamic;
-        rb.mass = Mathf.Max(0.0001f, nodeMass);
-        rb.gravityScale = nodeGravity;
-        rb.interpolation = RigidbodyInterpolation2D.Interpolate;
-        rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
-        rb.freezeRotation = true;
-        rb.angularDamping = 0.05f;
-        if (preventSleeping) rb.sleepMode = RigidbodySleepMode2D.NeverSleep;
-        else rb.sleepMode = RigidbodySleepMode2D.StartAwake;
+        var sj = a.gameObject.AddComponent<SpringJoint2D>();
+        sj.connectedBody = b;
+        sj.autoConfigureDistance = false;
+        sj.distance = Vector2.Distance(a.position, b.position);
+        sj.frequency = Mathf.Max(0.01f, freq);
+        sj.dampingRatio = Mathf.Clamp01(damp);
+        sj.enableCollision = false;
+    }
+
+    // Shoelace absolute area
+    float PolygonAreaWorldAbs()
+    {
+        float sum = 0f;
+        for (int i = 0; i < rbs.Count; i++)
+        {
+            Vector2 p = rbs[i].position;
+            Vector2 q = rbs[(i + 1) % rbs.Count].position;
+            sum += (p.x * q.y - q.x * p.y);
+        }
+        return Mathf.Abs(sum) * 0.5f;
+    }
+
+    Vector2 GetCentroid()
+    {
+        Vector2 s = Vector2.zero;
+        for (int i = 0; i < rbs.Count; i++) s += rbs[i].position;
+        return s / rbs.Count;
     }
 
     void FixedUpdate()
     {
-        if (nodes.Count == 0) return;
+        if (rbs.Count < 3) return;
 
-        Vector2 centerWorld = transform.position;
+        // ---- Internal pressure (radial, momentum-conserving) ----
+        float area = PolygonAreaWorldAbs();
+        float areaErrorRatio = (targetArea - area) / Mathf.Max(targetArea, 1e-5f); // -1..+1 근처
+        float kPressure = areaErrorRatio * pressureStiffness;
 
-        // mean radius
-        float meanRadius = 0f;
-        for (int i = 0; i < nodes.Count; i++)
-            meanRadius += Vector2.Distance(centerWorld, nodes[i].transform.position);
-        meanRadius /= nodes.Count;
+        Vector2 c = GetCentroid();
 
-        // auto hard-snap trigger
-        if (!hardSnapLocked && meanRadius < minAllowedRadius * autoHardSnapTriggerFactor)
+        // apply radial pressure & damping
+        for (int i = 0; i < rbs.Count; i++)
         {
-            StartCoroutine(TemporarilyHardSnapAndLock(hardSnapCooldown));
-            return;
-        }
+            Rigidbody2D rb = rbs[i];
+            Vector2 to = rb.position - c;
+            float d = to.magnitude;
+            Vector2 dir = (d > 1e-6f) ? (to / Mathf.Max(d, 1e-6f)) : Random.insideUnitCircle.normalized;
 
-        // per-node compression handling
-        for (int i = 0; i < nodes.Count; i++)
-        {
-            var go = nodes[i];
-            if (go == null) continue;
-            var rb = go.GetComponent<Rigidbody2D>();
-            if (rb == null) continue;
+            // radial pressure (합력 0: Σ(p_i - c) = 0 by definition)
+            rb.AddForce(dir * kPressure, ForceMode2D.Force);
 
-            Vector2 pos = rb.position;
-            Vector2 toNode = pos - centerWorld;
-            float dist = toNode.magnitude;
-            if (dist <= 1e-6f) toNode = Random.insideUnitCircle.normalized;
-
-            if (dist < minAllowedRadius)
+            // radial velocity damping
+            if (pressureDamping > 0f)
             {
-                Vector2 dir = toNode.normalized;
-                float deficit = minAllowedRadius - dist;
-                if (compressionMode == CompressionMode.SoftForce)
-                {
-                    float forceMag = compressionRestoreStrength * deficit * (1f + rb.mass);
-                    rb.AddForce(dir * forceMag, ForceMode2D.Force);
-                }
-                else
-                {
-                    Vector2 target = centerWorld + dir * minAllowedRadius;
-                    rb.position = target;
-                    rb.linearVelocity = Vector2.Lerp(rb.linearVelocity, Vector2.zero, Mathf.Clamp01(hardSnapDampenVelocity));
-                }
-            }
-
-            // velocity damping & clamp for stability
-            if (velocityDampingFactor < 0.999f)
-            {
-                rb.linearVelocity *= velocityDampingFactor;
-            }
-            if (rb.linearVelocity.sqrMagnitude > maxNodeSpeed * maxNodeSpeed)
-            {
-                rb.linearVelocity = rb.linearVelocity.normalized * maxNodeSpeed;
+                float vr = Vector2.Dot(rb.linearVelocity, dir);
+                rb.AddForce(-dir * vr * pressureDamping, ForceMode2D.Force);
             }
         }
 
-        // center stabilization: gently pull centroid back to transform.position
-        if (stabilizeCenter)
+        // ---- Minimum radius clamp (anti-collapse) ----
+        for (int i = 0; i < rbs.Count; i++)
         {
-            Vector2 centroid = Vector2.zero;
-            for (int i = 0; i < nodes.Count; i++) centroid += (Vector2)nodes[i].transform.position;
-            centroid /= nodes.Count;
-            Vector2 offset = centroid - (Vector2)transform.position;
-            // apply small corrective forces to nodes in opposite direction to recentre
-            if (offset.sqrMagnitude > 1e-6f)
+            Rigidbody2D rb = rbs[i];
+            Vector2 to = rb.position - c;
+            float d = to.magnitude;
+            if (d < minRadius)
             {
-                Vector2 correct = -offset * centerStabilizeStrength * Time.fixedDeltaTime;
-                // distribute correction to nodes (small force)
-                for (int i = 0; i < nodes.Count; i++)
-                {
-                    var rb = nodes[i].GetComponent<Rigidbody2D>();
-                    if (rb == null) continue;
-                    rb.AddForce(correct, ForceMode2D.Force);
-                }
-                // also gently nudge parent rigidbody if present
-                Rigidbody2D parentRb = GetComponent<Rigidbody2D>();
-                if (parentRb != null && anchorMode == AnchorMode.ParentDynamic)
-                {
-                    parentRb.AddForce(offset * centerStabilizeStrength * 0.25f * Time.fixedDeltaTime, ForceMode2D.Force);
-                }
+                Vector2 dir = (d > 1e-6f) ? (to / d) : Random.insideUnitCircle.normalized;
+                // position push-out
+                rb.position = c + dir * minRadius;
+                // kill inward radial velocity
+                float inward = Vector2.Dot(rb.linearVelocity, -dir);
+                if (inward > 0f) rb.linearVelocity += dir * inward;
             }
         }
-    }
 
-    IEnumerator TemporarilyHardSnapAndLock(float cooldown)
-    {
-        bool wasHard = (compressionMode == CompressionMode.HardSnap);
-        compressionMode = CompressionMode.HardSnap;
-        hardSnapLocked = true;
-
-        // immediate snap outward
-        Vector2 centerWorld = transform.position;
-        for (int i = 0; i < nodes.Count; i++)
+        // ---- Cancel horizontal COM drift when truly idle (no contact, small area error) ----
+        if (cancelHorizontalDriftWhenIdle)
         {
-            var rb = nodes[i].GetComponent<Rigidbody2D>();
-            if (rb == null) continue;
-            Vector2 dir = ((Vector2)rb.position - centerWorld).normalized;
-            if (dir.sqrMagnitude < 1e-6f) dir = Random.insideUnitCircle.normalized;
-            rb.position = centerWorld + dir * minAllowedRadius;
-            rb.linearVelocity = Vector2.Lerp(rb.linearVelocity, Vector2.zero, Mathf.Clamp01(hardSnapDampenVelocity));
-        }
+            int external = 0;
+            for (int i = 0; i < sensors.Count; i++) external += sensors[i].externalContacts;
 
-        yield return new WaitForSecondsRealtime(cooldown);
+            if (external == 0 && Mathf.Abs(areaErrorRatio) < idleAreaErrorEpsilon)
+            {
+                // 평균 수평 속도
+                float vxAvg = 0f;
+                for (int i = 0; i < rbs.Count; i++) vxAvg += rbs[i].linearVelocity.x;
+                vxAvg /= rbs.Count;
 
-        compressionMode = wasHard ? CompressionMode.HardSnap : CompressionMode.SoftForce;
-        hardSnapLocked = false;
-    }
-
-    void ApplyInitialImpulse(float strength)
-    {
-        if (strength == 0f) return;
-        Vector2 center = transform.position;
-        foreach (var n in nodes)
-        {
-            Rigidbody2D rb = n.GetComponent<Rigidbody2D>();
-            if (rb == null) continue;
-            Vector2 dir = ((Vector2)rb.position - center).normalized;
-            if (dir.sqrMagnitude < 1e-6f) dir = Vector2.up;
-            rb.AddForce(dir * strength, ForceMode2D.Impulse);
+                if (Mathf.Abs(vxAvg) > 0.0001f)
+                {
+                    float corr = Mathf.Clamp01(driftCancelStrength) * vxAvg;
+                    for (int i = 0; i < rbs.Count; i++)
+                    {
+                        var v = rbs[i].linearVelocity;
+                        v.x -= corr;            // 수직 낙하는 그대로 두고, 수평 드리프트만 제거
+                        rbs[i].linearVelocity = v;
+                    }
+                }
+            }
         }
     }
 
     float GetPrefabRadius(GameObject prefab)
     {
-        if (prefab == null) return 0.5f;
-        SpriteRenderer sr = prefab.GetComponent<SpriteRenderer>();
-        if (sr != null) return sr.bounds.extents.x;
-        CircleCollider2D cc = prefab.GetComponent<CircleCollider2D>();
-        if (cc != null) return cc.radius * prefab.transform.localScale.x;
-        BoxCollider2D bc = prefab.GetComponent<BoxCollider2D>();
-        if (bc != null) return (bc.size.x * prefab.transform.localScale.x) * 0.5f;
-        return prefab.transform.localScale.x * 0.5f;
-    }
+        var sr = prefab.GetComponent<SpriteRenderer>();
+        if (sr) return Mathf.Max(sr.bounds.extents.x, sr.bounds.extents.y);
 
-    // optional cleanup
-    public void ClearNodes()
-    {
-        for (int i = transform.childCount - 1; i >= 0; i--)
-        {
-#if UNITY_EDITOR
-            DestroyImmediate(transform.GetChild(i).gameObject);
-#else
-            Destroy(transform.GetChild(i).gameObject);
-#endif
-        }
-        nodes.Clear();
-        nodeColliders.Clear();
+        var cc = prefab.GetComponent<CircleCollider2D>();
+        if (cc) return cc.radius * Mathf.Max(prefab.transform.localScale.x, prefab.transform.localScale.y);
+
+        var bc = prefab.GetComponent<BoxCollider2D>();
+        if (bc) return Mathf.Max(bc.size.x * prefab.transform.localScale.x, bc.size.y * prefab.transform.localScale.y) * 0.5f;
+
+        return 0.5f;
     }
 }
