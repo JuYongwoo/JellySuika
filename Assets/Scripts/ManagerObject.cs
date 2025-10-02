@@ -5,6 +5,7 @@ public class ManagerObject : MonoBehaviour
     public static ManagerObject instance;
     public InputManager inputManager = new InputManager();
     public ResourceManager resourceManager = new ResourceManager();
+    public ActionManager actionManager = new ActionManager();
 
     private void Awake()
     {
