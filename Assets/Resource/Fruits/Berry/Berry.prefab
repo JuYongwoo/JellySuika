@@ -10,11 +10,11 @@ GameObject:
   m_Component:
   - component: {fileID: 6811219128890141006}
   - component: {fileID: 966236855163982634}
-  - component: {fileID: -8357330968635522391}
-  - component: {fileID: -1972147355541838163}
-  - component: {fileID: -3441457382641670953}
+  - component: {fileID: -4341092856902527585}
+  - component: {fileID: -3203004560402739848}
+  - component: {fileID: -7237061864480940498}
   m_Layer: 0
-  m_Name: Melon
+  m_Name: Berry
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -47,10 +47,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c75945180194c204bba432e5a94dd3bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nodePrefab: {fileID: 6245279223952659903, guid: a9e269338bdec5746a21e28d9430d7b6, type: 3}
-  nodeCount: 16
+  nodePrefab: {fileID: 6245279223952659903, guid: 023a830430bf81245b6d56c87f85190a, type: 3}
+  nodeCount: 12
   usePrefabRadius: 1
-  radius: 1.25
+  radius: 0.3
   ignoreSelfCollision: 1
   addShear: 1
   edgeFrequency: 12
@@ -71,7 +71,7 @@ MonoBehaviour:
   gravityScale: 1
   linearDrag: 0.1
   angularDrag: 0.05
---- !u!33 &-8357330968635522391
+--- !u!33 &-4341092856902527585
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -79,7 +79,7 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7058974067128140919}
   m_Mesh: {fileID: 0}
---- !u!23 &-1972147355541838163
+--- !u!23 &-3203004560402739848
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -124,7 +124,7 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &-3441457382641670953
+--- !u!114 &-7237061864480940498
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -136,7 +136,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 68928cf5eb1d54649a7871828161e3c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sprite: {fileID: 3776312371561069292, guid: 5b43668a1176e024b91d6016c45a4a58, type: 3}
+  sprite: {fileID: 7293598183456022363, guid: 18c372f12cdbe0c458a9aef90e3fa3ca, type: 3}
   autoCreateMaterial: 1
   shaderName: Sprites/Default
   sortingLayer: 

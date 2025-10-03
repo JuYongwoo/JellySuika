@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class InputManager : MonoBehaviour
+public class InputManager
 {
     void Start()
     {
@@ -9,7 +9,7 @@ public class InputManager : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    public void Update()
     {
         if (Input.GetMouseButtonDown(0))
         {

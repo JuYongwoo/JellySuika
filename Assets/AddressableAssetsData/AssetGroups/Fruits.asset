@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Fruits
+  m_EditorClassIdentifier: 
+  m_GroupName: Fruits
+  m_GUID: c5ef47f82a9530045917a0e2cd459e39
+  m_SerializeEntries:
+  - m_GUID: 182fec2778be13f42924f3908c438431
+    m_Address: Suika
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Fruits
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4177f991114cb8547b596596b31e6e92
+    m_Address: Berry
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Fruits
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4f57966b742f3f54c83a36f22c170402
+    m_Address: Melon
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Fruits
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 629b739d87e14b848a6516c107b5d863
+    m_Address: Orange
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Fruits
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d18bd9c1c436b344c8bb50aba57741fd
+    m_Address: Apple
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Fruits
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 58e35f9c49e38624290fb2eac3c307dc, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 9168b13053cb8844198394d52c8078e1, type: 2}
+    - {fileID: 11400000, guid: 3289bf90a5309864bbebc01880db9b26, type: 2}

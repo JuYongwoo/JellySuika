@@ -1,19 +1,30 @@
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 public enum Fruits
 {
-    Apple,
-    Pear,
-    Orange,
+    Berry,
     Grape,
+    Apple,
+    Orange,
+    Melon,
+    Suika,
 
 }
 
-public class ResourceManager : MonoBehaviour
+public class ResourceManager
 {
-    void Start()
+    public Dictionary<Fruits, AsyncOperationHandle<GameObject>> fruitsObjMap;
+
+
+    public void Init() //게임 시작과 동시에 비동기 로드 시작
     {
-        
+
+        fruitsObjMap = Util.LoadDictWithEnum<Fruits, GameObject>();
+
+
+
     }
 
 }

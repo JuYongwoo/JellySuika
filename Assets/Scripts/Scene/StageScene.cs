@@ -22,6 +22,12 @@ public class StageScene : MonoBehaviour
         ManagerObject.instance.actionManager.OnClick += clickEvent;
     }
 
+    private void OnDestroy()
+    {
+        ManagerObject.instance.actionManager.OnClick -= clickEvent;
+
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -36,8 +42,9 @@ public class StageScene : MonoBehaviour
         RaycastHit2D hit = Physics2D.Raycast(ray.origin, ray.direction, 100, mask);
         if (hit)
         {
-            //이번 순서의 프리팹 소환
-
+            GameObject go = Instantiate(ManagerObject.instance.resourceManager.fruitsObjMap[fruitQueue.Dequeue()].Result);
+            go.transform.position = new Vector2(ray.origin.x, ray.origin.y);
+            addRandomFruitList();
         }
     }
 
@@ -47,7 +54,7 @@ public class StageScene : MonoBehaviour
         while(fruitQueue.Count < listSize)
         {
             
-            fruitQueue.Enqueue(Enum.Parse<Fruits>(UnityEngine.Random.Range(0, listSize).ToString()));
+            fruitQueue.Enqueue(Enum.Parse<Fruits>(UnityEngine.Random.Range(0, (int)Fruits.Apple).ToString()));
         }
     }
 }

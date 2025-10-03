@@ -1,7 +1,6 @@
 using System;
-using UnityEngine;
 
-public class ActionManager : MonoBehaviour
+public class ActionManager
 {
 
     public event Action OnClick;

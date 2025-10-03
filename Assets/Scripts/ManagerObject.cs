@@ -10,7 +10,7 @@ public class ManagerObject : MonoBehaviour
     private void Awake()
     {
         
-        if(instance != null)
+        if(instance == null)
         {
             instance = this;
         }
@@ -20,10 +20,7 @@ public class ManagerObject : MonoBehaviour
         }
             DontDestroyOnLoad(gameObject);
 
-
-
-
-
+        resourceManager.Init();
     }
     void Start()
     {
@@ -33,6 +30,6 @@ public class ManagerObject : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        inputManager.Update();
     }
 }
