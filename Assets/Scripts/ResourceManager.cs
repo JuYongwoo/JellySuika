@@ -5,8 +5,8 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 public enum Fruits
 {
     Berry,
-    Grape,
     Apple,
+    Grape,
     Orange,
     Melon,
     Suika,
