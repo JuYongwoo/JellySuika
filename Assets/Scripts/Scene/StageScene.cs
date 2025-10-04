@@ -27,6 +27,8 @@ public class StageScene : MonoBehaviour
 
     public int listSize = 6;
 
+    private bool isLocked = false;
+
 
     private void Update()
     {
@@ -38,12 +40,41 @@ public class StageScene : MonoBehaviour
         {
             case State.Moving_Start:
                 setState(State.Moving);
-                addFruitImmediately();
+
+
+                //위에 생성하고
+
+                Fruits fr = fruitQueue.Dequeue();
+                currentFruit = Instantiate(ManagerObject.instance.resourceManager.fruitsObjMap[fr].Result, new Vector2(0, height), new Quaternion());
+                currentFruit.GetComponent<WaterBalloon>().setType(fr);
+
+
+                /////////////중력 잠금
+                currentFruit.GetComponent<WaterBalloon>().setGravity(false);
+                currentFruit.GetComponent<WaterBalloon>().setNodeDistance(false);
+                isLocked = true;
+
+
+                //리스트 추가
+                while (fruitQueue.Count < listSize)
+                {
+                    fruitQueue.Enqueue(Enum.Parse<Fruits>(UnityEngine.Random.Range(0, (int)Fruits.Melon).ToString()));
+                }
+
+
+
                 ManagerObject.instance.actionManager.MoveLeftRightWithKeyBoard += moveWithKeyBorad; //키보드 좌우 움직이기 가능
                 ManagerObject.instance.actionManager.LockReleaesCurrentFruit += lockReleaseCurrentFruit; // 과일 놓기 가능
                 ManagerObject.instance.actionManager.ReleaseCurrentFruitWithMouse += releaseCurrentFruitWithMouse; //마우스 클릭으로 놓기 가능
                 break;
             case State.Moving:
+                //놓으면 다음 상태로
+                if (!isLocked)
+                {
+                    currentFruit.GetComponent<WaterBalloon>().setGravity(true);
+                    currentFruit.GetComponent<WaterBalloon>().setNodeDistance(true);
+                    setState(State.Moving_End);
+                }
                 break;
             case State.Moving_End:
                 setState(State.Droping_Start);
@@ -98,42 +129,19 @@ public class StageScene : MonoBehaviour
         gameState = s;
     }
 
-    private void addFruitImmediately()
-    {
-        //위에 생성하고
-
-        Fruits fr = fruitQueue.Dequeue();
-        currentFruit = Instantiate(ManagerObject.instance.resourceManager.fruitsObjMap[fr].Result, new Vector2(0, height), new Quaternion());
-        currentFruit.GetComponent<WaterBalloon>().setType(fr);
-
-
-        //y축 고정
-        Rigidbody2D[] rigids = currentFruit.GetComponentsInChildren<Rigidbody2D>();
-        for (int i = 0; i < rigids.Length; i++)
-        {
-            rigids[i].constraints |= RigidbodyConstraints2D.FreezePositionY;
-        }
-
-        //리스트 추가
-        while (fruitQueue.Count < listSize)
-        {
-            fruitQueue.Enqueue(Enum.Parse<Fruits>(UnityEngine.Random.Range(0, (int)Fruits.Melon).ToString()));
-        }
-
-    }
 
 
     private void lockReleaseCurrentFruit(bool isLock)
     {
-        Rigidbody2D[] rigids = currentFruit.GetComponentsInChildren<Rigidbody2D>();
+        //Rigidbody2D[] rigids = currentFruit.GetComponentsInChildren<Rigidbody2D>();
 
-        for (int i = 0; i < rigids.Length; i++)
-        {
-            if(isLock) rigids[i].constraints |= RigidbodyConstraints2D.FreezePositionY;
-            else rigids[i].constraints &= ~RigidbodyConstraints2D.FreezePositionY;
-        }
+        //for (int i = 0; i < rigids.Length; i++)
+        //{
+        //    if(isLock) rigids[i].constraints |= RigidbodyConstraints2D.FreezePositionY;
+        //    else rigids[i].constraints &= ~RigidbodyConstraints2D.FreezePositionY;
+        //}
 
-        if (!isLock) nextState();
+        isLocked = isLock;
     }
 
     private void moveWithKeyBorad(bool isLeft)

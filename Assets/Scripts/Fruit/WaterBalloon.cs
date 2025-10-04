@@ -1,5 +1,8 @@
 using System.Collections.Generic;
+using Unity.Android.Gradle.Manifest;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.SocialPlatforms;
 
 [DisallowMultipleComponent]
 public class WaterBalloon : MonoBehaviour
@@ -50,7 +53,7 @@ public class WaterBalloon : MonoBehaviour
     private class NodeSensor : MonoBehaviour
     {
         public Transform balloonRoot;
-        public int externalContacts;
+        //public int externalContacts;
 
         void OnCollisionEnter2D(Collision2D c)
         {
@@ -59,27 +62,26 @@ public class WaterBalloon : MonoBehaviour
                 WaterBalloon cwb = c.transform.root.GetComponent<WaterBalloon>();
                 if (cwb)
                 {
-                    externalContacts++;
+                    //externalContacts++;
                     WaterBalloon twb = this.transform.root.GetComponent<WaterBalloon>();
                     if (cwb.fruitType == twb.fruitType)
                     {
                         cwb.destroySelf();
                         twb.destroySelf();
                         //서로의 부모 없앤다
+
+                        //중간 지점에 type+1의 프리팹(리소스매니저에서) 소환
+                        //만약 suika면 소환하지않음
                     }
                 }
-
             }
-
-
-        
         }
 
-        void OnCollisionExit2D(Collision2D c)
-        { if (c.transform.root != balloonRoot) externalContacts = Mathf.Max(0, externalContacts - 1); }
+        //void OnCollisionExit2D(Collision2D c)
+        //{ if (c.transform.root != balloonRoot) externalContacts = Mathf.Max(0, externalContacts - 1); }
 
-        void OnCollisionStay2D(Collision2D c)
-        { if (c.transform.root != balloonRoot && externalContacts <= 0) externalContacts = 1; }
+        //void OnCollisionStay2D(Collision2D c)
+        //{ if (c.transform.root != balloonRoot && externalContacts <= 0) externalContacts = 1; }
 
     }
 
@@ -96,6 +98,45 @@ public class WaterBalloon : MonoBehaviour
     public void destroySelf()
     {
         Destroy(gameObject);
+    }
+
+    public void setGravity(bool isOn)
+    {
+        if (isOn)
+        {
+            for (int i = 0; i < rbs.Count; i++)
+            {
+                rbs[i].gravityScale = 1f;
+            }
+        }
+        else
+        {
+            for (int i = 0; i < rbs.Count; i++)
+            {
+                rbs[i].gravityScale = 0;
+            }
+        }
+    }
+
+
+
+    public void setNodeDistance(bool isOn) //내부 스프링조인트들이 중앙과의 최대거리 (과일이 소환되면 처음엔 0.1f, 이후에 원래 반지름으로 하여 다른 과일들을 밀어낼 수 있도록 조정해야)
+    {
+        if (isOn)
+        {
+            for (int i = 0; i < nodeCount; i++)
+            {
+                rbs[i].GetComponent<SpringJoint2D>().distance = Vector3.Distance(rbs[i].position, rbs[(i + 1) % nodeCount].position);
+            }
+
+        }
+        else
+        {
+            for (int i = 0; i < nodeCount; i++)
+            {
+                rbs[i].GetComponent<SpringJoint2D>().distance = 0.1f;
+            }
+        }
     }
 
 
@@ -131,6 +172,7 @@ public class WaterBalloon : MonoBehaviour
         {
             float ang = (i / (float)nodeCount) * Mathf.PI * 2f;
             Vector2 local = new(Mathf.Cos(ang) * R, Mathf.Sin(ang) * R);
+            //Vector2 local = new(Mathf.Cos(ang) * 0.1f, Mathf.Sin(ang) * 0.1f); //중앙으로부터 0.1f에서 퍼지도록(밑에서 소환된 경우 다른 과일 밀어내기 위해)
 
             var go = Instantiate(nodePrefab, transform);
             go.name = $"node_{i}";
@@ -175,6 +217,7 @@ public class WaterBalloon : MonoBehaviour
         // target area
         targetArea = Mathf.Abs(PolygonAreaSigned());
     }
+
 
     void AddSpring(Rigidbody2D a, Rigidbody2D b, float freq, float damp)
     {
@@ -287,30 +330,30 @@ public class WaterBalloon : MonoBehaviour
             }
         }
 
-        // --- idle일 때 수평 COM 드리프트 제거(원 코드 유지) ---
-        if (cancelHorizontalDriftWhenIdle && Mathf.Abs(areaErrorRatio) < idleAreaErrorEpsilon)
-        {
-            int external = 0;
-            for (int i = 0; i < sensors.Count; i++) external += sensors[i].externalContacts;
+        //// --- idle일 때 수평 COM 드리프트 제거(원 코드 유지) ---
+        //if (cancelHorizontalDriftWhenIdle && Mathf.Abs(areaErrorRatio) < idleAreaErrorEpsilon)
+        //{
+        //    int external = 0;
+        //    for (int i = 0; i < sensors.Count; i++) external += sensors[i].externalContacts;
 
-            if (external == 0)
-            {
-                float vxAvg = 0f;
-                for (int i = 0; i < rbs.Count; i++) vxAvg += rbs[i].linearVelocity.x;
-                vxAvg /= rbs.Count;
+        //    if (external == 0)
+        //    {
+        //        float vxAvg = 0f;
+        //        for (int i = 0; i < rbs.Count; i++) vxAvg += rbs[i].linearVelocity.x;
+        //        vxAvg /= rbs.Count;
 
-                if (Mathf.Abs(vxAvg) > 0.0001f)
-                {
-                    float corr = Mathf.Clamp01(driftCancelStrength) * vxAvg;
-                    for (int i = 0; i < rbs.Count; i++)
-                    {
-                        var v = rbs[i].linearVelocity;
-                        v.x -= corr;
-                        rbs[i].linearVelocity = v;
-                    }
-                }
-            }
-        }
+        //        if (Mathf.Abs(vxAvg) > 0.0001f)
+        //        {
+        //            float corr = Mathf.Clamp01(driftCancelStrength) * vxAvg;
+        //            for (int i = 0; i < rbs.Count; i++)
+        //            {
+        //                var v = rbs[i].linearVelocity;
+        //                v.x -= corr;
+        //                rbs[i].linearVelocity = v;
+        //            }
+        //        }
+        //    }
+        //}
     }
 
     float GetPrefabRadius(GameObject prefab)
