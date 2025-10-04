@@ -20,6 +20,8 @@ public class StageScene : MonoBehaviour
     private Queue<Fruits> fruitQueue = new Queue<Fruits>(new[] { Fruits.Berry});
     private GameObject currentFruit;
     private State gameState = State.Moving_Start;
+    public const float height = 3.8f;
+    public const float xDeadZone = 2f;
 
     private Coroutine currentCoroutine = null;
 
@@ -101,7 +103,7 @@ public class StageScene : MonoBehaviour
         //위에 생성하고
 
         Fruits fr = fruitQueue.Dequeue();
-        currentFruit = Instantiate(ManagerObject.instance.resourceManager.fruitsObjMap[fr].Result, new Vector2(0, 3.8f), new Quaternion());
+        currentFruit = Instantiate(ManagerObject.instance.resourceManager.fruitsObjMap[fr].Result, new Vector2(0, height), new Quaternion());
 
 
         //y축 고정
@@ -139,12 +141,12 @@ public class StageScene : MonoBehaviour
         {
             if (isLeft)
             {
-                if (currentFruit.transform.position.x > -2)
+                if (currentFruit.transform.position.x > -xDeadZone)
                     currentFruit.transform.Translate(Vector3.left * Time.deltaTime * 1);
             }
             else
             {
-                if (currentFruit.transform.position.x < 2)
+                if (currentFruit.transform.position.x < xDeadZone)
                     currentFruit.transform.Translate(Vector3.right * Time.deltaTime * 1);
             }
         }
@@ -161,9 +163,24 @@ public class StageScene : MonoBehaviour
         RaycastHit2D hit = Physics2D.Raycast(ray.origin, ray.direction, 100, mask);
         if (hit)
         {
-
+            currentFruit.transform.position = getAvailableClosestPosition(Camera.main.ScreenToWorldPoint(Input.mousePosition)); //현재 마우스로부터 가장 가까운 소환 가능 지점으로 이동
             lockReleaseCurrentFruit(false);
         }
+    }
+
+    private Vector3 getAvailableClosestPosition(Vector3 origin) //마우스로 클릭했을 때 가장 가까운 소환 가능한 영역을 리턴, 
+    {
+        Vector3 vec = new Vector3(origin.x, height, 0);
+
+        if(origin.x > xDeadZone)
+        {
+            vec.x = xDeadZone;
+        }
+        else if(origin.x < -xDeadZone)
+        {
+            vec.x = -xDeadZone;
+        }
+            return vec;
     }
 
 

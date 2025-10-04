@@ -12,11 +12,8 @@ public class WaterBalloon : MonoBehaviour
     public bool ignoreSelfCollision = true;
 
     [Header("Membrane (edge springs)")]
-    public bool addShear = true;
     public float edgeFrequency = 12f;
     [Range(0f, 1f)] public float edgeDamping = 0.6f;
-    public float shearFrequency = 8f;
-    [Range(0f, 1f)] public float shearDamping = 0.6f;
 
     [Header("Internal Pressure / Area Preserve (radial)")]
     public float pressureStiffness = 40f;
@@ -87,8 +84,8 @@ public class WaterBalloon : MonoBehaviour
 
         var cols = new List<Collider2D>(nodeCount);
 
-        // place nodes on circle (CCW)
-        for (int i = 0; i < nodeCount; i++)
+
+        for (int i = 0; i < nodeCount; i++) //자식 오브젝트 생성
         {
             float ang = (i / (float)nodeCount) * Mathf.PI * 2f;
             Vector2 local = new(Mathf.Cos(ang) * R, Mathf.Sin(ang) * R);
@@ -119,7 +116,7 @@ public class WaterBalloon : MonoBehaviour
             cols.Add(col);
         }
 
-        // ignore self collisions
+        // 서로의 콜리전은 무시한다.
         if (ignoreSelfCollision)
         {
             for (int i = 0; i < cols.Count; i++)
@@ -127,11 +124,10 @@ public class WaterBalloon : MonoBehaviour
                     Physics2D.IgnoreCollision(cols[i], cols[j], true);
         }
 
-        // membrane springs
+        // SpringJoint2D 추가
         for (int i = 0; i < nodeCount; i++)
         {
             AddSpring(rbs[i], rbs[(i + 1) % nodeCount], edgeFrequency, edgeDamping);
-            if (addShear) AddSpring(rbs[i], rbs[(i + 2) % nodeCount], shearFrequency, shearDamping);
         }
 
         // target area

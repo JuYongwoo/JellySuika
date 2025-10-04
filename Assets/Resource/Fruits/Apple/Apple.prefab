@@ -60,11 +60,8 @@ MonoBehaviour:
   usePrefabRadius: 1
   radius: 0.7
   ignoreSelfCollision: 1
-  addShear: 1
-  edgeFrequency: 12
+  edgeFrequency: 20
   edgeDamping: 0.6
-  shearFrequency: 8
-  shearDamping: 0.6
   pressureStiffness: 100
   pressureDamping: 0.2
   minRadiusFactor: 0.6
