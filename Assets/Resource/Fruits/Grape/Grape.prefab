@@ -48,9 +48,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   nodePrefab: {fileID: 6245279223952659903, guid: ec5800832fa0c90478b43070fd7ada1e, type: 3}
-  nodeCount: 16
+  nodeCount: 24
   usePrefabRadius: 1
-  radius: 0.8
+  radius: 0.6
   ignoreSelfCollision: 1
   addShear: 1
   edgeFrequency: 12

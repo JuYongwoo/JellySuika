@@ -2,55 +2,102 @@ using UnityEngine;
 using System.Collections.Generic;
 using System;
 using System.Linq;
+using System.Collections;
 
 
 public class StageScene : MonoBehaviour
 {
     private enum State
     {
+        Moving_Start,
         Moving, //플레이어가 조종가능한 상태
+        Moving_End,
+        Droping_Start,
         Droping, //과일이 떨어지는 상태, 2초 대기
+        Droping_End,
     }
 
     private Queue<Fruits> fruitQueue = new Queue<Fruits>(new[] { Fruits.Berry});
     private GameObject currentFruit;
+    private State gameState = State.Moving_Start;
+
+    private Coroutine currentCoroutine = null;
 
     public int listSize = 6;
 
-    void Start()
+
+    private void Update()
     {
-        //위에 과일 생성
-        addFruit();
+        //Debug.Log($"Current State = {gameState}");
 
 
 
+        switch (gameState)
+        {
+            case State.Moving_Start:
+                setState(State.Moving);
+                addFruitImmediately();
+                ManagerObject.instance.actionManager.MoveLeftRightWithKeyBoard += moveWithKeyBorad; //키보드 좌우 움직이기 가능
+                ManagerObject.instance.actionManager.LockReleaesCurrentFruit += lockReleaseCurrentFruit; // 과일 놓기 가능
+                ManagerObject.instance.actionManager.ReleaseCurrentFruitWithMouse += releaseCurrentFruitWithMouse; //마우스 클릭으로 놓기 가능
+                break;
+            case State.Moving:
+                break;
+            case State.Moving_End:
+                setState(State.Droping_Start);
+                break;
+            case State.Droping_Start:
+                setState(State.Droping);
+                ManagerObject.instance.actionManager.MoveLeftRightWithKeyBoard -= moveWithKeyBorad;
+                ManagerObject.instance.actionManager.LockReleaesCurrentFruit -= lockReleaseCurrentFruit;
+                ManagerObject.instance.actionManager.ReleaseCurrentFruitWithMouse -= releaseCurrentFruitWithMouse;
+                break;
+            case State.Droping:
+                if (currentCoroutine == null)
+                {
+                    currentCoroutine = StartCoroutine(setState(State.Droping_End, 1.5f));
+                }
+                break;
+            case State.Droping_End:
+                setState(State.Moving_Start);
+                break;
 
 
-        ManagerObject.instance.actionManager.ClickEvent -= clickEvent;
-        ManagerObject.instance.actionManager.ClickEvent += clickEvent;
-
-        ManagerObject.instance.actionManager.MoveLeftRight -= moveCurrentFruit;
-        ManagerObject.instance.actionManager.MoveLeftRight += moveCurrentFruit;
-
-        ManagerObject.instance.actionManager.LockReleaesCurrentFruit -= lockReleaseCurrentFruit;
-        ManagerObject.instance.actionManager.LockReleaesCurrentFruit += lockReleaseCurrentFruit;
-
-
+        }
     }
 
     private void OnDestroy()
     {
-        ManagerObject.instance.actionManager.ClickEvent -= clickEvent;
-        ManagerObject.instance.actionManager.MoveLeftRight -= moveCurrentFruit;
+        ManagerObject.instance.actionManager.MoveLeftRightWithKeyBoard -= moveWithKeyBorad;
         ManagerObject.instance.actionManager.LockReleaesCurrentFruit -= lockReleaseCurrentFruit;
+        ManagerObject.instance.actionManager.ReleaseCurrentFruitWithMouse -= releaseCurrentFruitWithMouse;
 
 
     }
 
-    private void addFruit()
+    private void nextState()
     {
+        setState(gameState + 1);
+    }
+
+    private IEnumerator setState(State s, float seconds)
+    {
+        yield return new WaitForSeconds(seconds);
+        gameState = s;
+        currentCoroutine = null;
+    }
 
 
+    private void setState(State s)
+    {
+        int sint = (int)s;
+        sint = sint % (Enum.GetValues(typeof(State)).Length); //+1로 넘기더라도 문제되지 않도록
+        s = (State)sint;
+        gameState = s;
+    }
+
+    private void addFruitImmediately()
+    {
         //위에 생성하고
 
         Fruits fr = fruitQueue.Dequeue();
@@ -69,6 +116,7 @@ public class StageScene : MonoBehaviour
         {
             fruitQueue.Enqueue(Enum.Parse<Fruits>(UnityEngine.Random.Range(0, (int)Fruits.Melon).ToString()));
         }
+
     }
 
 
@@ -82,22 +130,30 @@ public class StageScene : MonoBehaviour
             else rigids[i].constraints &= ~RigidbodyConstraints2D.FreezePositionY;
         }
 
-        if(!isLock) addFruit(); //과일을 놓았기 때문에 새로운 과일 생성 & 리스트 채우기
+        if (!isLock) nextState();
     }
 
-    private void moveCurrentFruit(bool isLeft)
+    private void moveWithKeyBorad(bool isLeft)
     {
         if (currentFruit)
         {
-            if(isLeft) currentFruit.transform.Translate(Vector3.left * Time.deltaTime * 1);
-            else currentFruit.transform.Translate(Vector3.right * Time.deltaTime * 1);
+            if (isLeft)
+            {
+                if (currentFruit.transform.position.x > -2)
+                    currentFruit.transform.Translate(Vector3.left * Time.deltaTime * 1);
+            }
+            else
+            {
+                if (currentFruit.transform.position.x < 2)
+                    currentFruit.transform.Translate(Vector3.right * Time.deltaTime * 1);
+            }
         }
 
     }
 
 
 
-    void clickEvent()
+    void releaseCurrentFruitWithMouse()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         LayerMask mask = LayerMask.GetMask("Back");

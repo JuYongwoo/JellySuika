@@ -4,19 +4,19 @@ using Unity.VisualScripting;
 public class ActionManager
 {
 
-    public event Action ClickEvent;
-    public event Action<bool> MoveLeftRight;
+    public event Action ReleaseCurrentFruitWithMouse;
+    public event Action<bool> MoveLeftRightWithKeyBoard;
     public event Action<bool> LockReleaesCurrentFruit;
 
 
     public void OnClickEvent()
     {
-        ClickEvent?.Invoke();
+        ReleaseCurrentFruitWithMouse?.Invoke();
     }
 
     public void OnMoveLeftRight(bool isLeft)
     {
-        MoveLeftRight?.Invoke(isLeft);
+        MoveLeftRightWithKeyBoard?.Invoke(isLeft);
     }
 
     public void OnLockReleaesCurrentFruit(bool isLock)

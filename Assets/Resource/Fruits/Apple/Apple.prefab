@@ -58,14 +58,14 @@ MonoBehaviour:
   nodePrefab: {fileID: 6245279223952659903, guid: 87ffe25b06162b94f851785a7bc9c53e, type: 3}
   nodeCount: 32
   usePrefabRadius: 1
-  radius: 1
+  radius: 0.7
   ignoreSelfCollision: 1
   addShear: 1
   edgeFrequency: 12
   edgeDamping: 0.6
-  shearFrequency: 12.96
+  shearFrequency: 8
   shearDamping: 0.6
-  pressureStiffness: 40
+  pressureStiffness: 100
   pressureDamping: 0.2
   minRadiusFactor: 0.6
   maxRadiusFactor: 1.25

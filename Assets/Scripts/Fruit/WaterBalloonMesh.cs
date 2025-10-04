@@ -7,7 +7,7 @@ using UnityEditor.SceneManagement;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 [DefaultExecutionOrder(100)]
-public class BalloonSpriteSkin2D : MonoBehaviour
+public class WaterBalloonMesh : MonoBehaviour
 {
     [Header("Sprite & Material")]
     public Sprite sprite;

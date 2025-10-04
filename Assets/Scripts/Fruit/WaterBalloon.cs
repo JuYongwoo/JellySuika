@@ -1,61 +1,37 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// 2D 물풍선: 다수의 노드(Rigidbody2D) + 막(스프링) + 내부 압력(면적 보존, 반지름 방향)
-/// + 최소/최대 반경 클램프(퍼짐/찌그러짐 상한·하한)
-/// - 중앙 조인트 없음, 노드끼리 충돌은 기본 무시(월드와는 충돌)
-/// - 드리프트 방지: 압력을 반지름 방향으로 적용(합력 ≈ 0), 아이들에서 수평 COM 드리프트 소거
-/// </summary>
 [DisallowMultipleComponent]
-public class WaterBalloon2D : MonoBehaviour
+public class WaterBalloon : MonoBehaviour
 {
     [Header("Nodes")]
     public GameObject nodePrefab;
     [Range(8, 128)] public int nodeCount = 32;
-    [Tooltip("프리팹 크기로 초기 반지름 추정(권장)")]
     public bool usePrefabRadius = true;
-    [Tooltip("usePrefabRadius=false일 때만 사용")]
     public float radius = 0.5f;
-
-    [Tooltip("노드끼리 충돌 무시 (월드와는 충돌)")]
     public bool ignoreSelfCollision = true;
 
     [Header("Membrane (edge springs)")]
     public bool addShear = true;
-    [Tooltip("가장자리 스프링 주파수 (10~14 젤리 느낌)")]
     public float edgeFrequency = 12f;
     [Range(0f, 1f)] public float edgeDamping = 0.6f;
-
-    [Tooltip("대각(이웃의 이웃) 스프링 주파수")]
     public float shearFrequency = 8f;
     [Range(0f, 1f)] public float shearDamping = 0.6f;
 
     [Header("Internal Pressure / Area Preserve (radial)")]
-    [Tooltip("면적 오차 비율 → 압력 크기(30~60 권장)")]
     public float pressureStiffness = 40f;
-    [Tooltip("반경 방향 속도 감쇠 (출렁임 제어)")]
     [Range(0f, 2f)] public float pressureDamping = 0.2f;
 
     [Header("Clamp (min/max spread)")]
-    [Tooltip("중심에서 최소 허용 반경 비율 (0.55~0.65 권장)")]
     [Range(0.1f, 0.95f)] public float minRadiusFactor = 0.6f;
-
-    [Tooltip("중심에서 최대 허용 반경 비율 (1.0=초기크기, 1.3=30% 팽창 허용)")]
     [Range(1.0f, 5f)] public float maxRadiusFactor = 1.25f;
-
-    [Tooltip("최대 반경을 넘을 때 즉시 자르는 대신 부드럽게 되밀기")]
     public bool softMaxClamp = true;
-    [Tooltip("소프트 최대 클램프 반발력 계수")]
     public float maxClampStiffness = 60f;
     [Range(0f, 1f)] public float maxClampDamping = 0.3f;
 
     [Header("Drift Kill (idle only)")]
-    [Tooltip("외부 접촉 없고 압력 에러가 작을 때 수평 COM 드리프트 제거")]
     public bool cancelHorizontalDriftWhenIdle = true;
-    [Tooltip("드리프트 제거 강도 (1=즉시 제거, 0.2~0.5 권장)")]
     [Range(0f, 1f)] public float driftCancelStrength = 0.35f;
-    [Tooltip("아이들 판정: |areaErrorRatio| < 이 값")]
     public float idleAreaErrorEpsilon = 0.02f;
 
     [Header("Node Rigidbodies")]
@@ -64,14 +40,12 @@ public class WaterBalloon2D : MonoBehaviour
     public float linearDrag = 0.1f;
     public float angularDrag = 0.05f;
 
-    // Internals
+    // ---- Internals ----
     private readonly List<Rigidbody2D> rbs = new();
-    private readonly List<Collider2D> cols = new();
     private readonly List<NodeSensor> sensors = new();
     private float targetArea;
     private float minRadius;
-    private float maxRadius;   // ★ 추가: 최대 퍼짐 반경
-    private float initialRadius;
+    private float maxRadius;
 
     private class NodeSensor : MonoBehaviour
     {
@@ -88,7 +62,7 @@ public class WaterBalloon2D : MonoBehaviour
         { if (c.transform.root != balloonRoot && externalContacts <= 0) externalContacts = 1; }
     }
 
-    void Awake()                 // ★여기로 이동
+    void Awake()
     {
         Build();
     }
@@ -97,7 +71,7 @@ public class WaterBalloon2D : MonoBehaviour
     {
         // cleanup
         for (int i = transform.childCount - 1; i >= 0; i--) Destroy(transform.GetChild(i).gameObject);
-        rbs.Clear(); cols.Clear(); sensors.Clear();
+        rbs.Clear(); sensors.Clear();
 
         if (nodePrefab == null)
         {
@@ -107,14 +81,16 @@ public class WaterBalloon2D : MonoBehaviour
 
         float R = usePrefabRadius ? Mathf.Max(0.001f, GetPrefabRadius(nodePrefab))
                                   : Mathf.Max(0.001f, radius);
-        initialRadius = R;
-        minRadius = R * minRadiusFactor;
-        maxRadius = R * Mathf.Max(1.0f, maxRadiusFactor); // ★ 최대 반경 계산
 
-        // place nodes on a perfect circle (CCW)
+        minRadius = R * minRadiusFactor;
+        maxRadius = R * Mathf.Max(1.0f, maxRadiusFactor);
+
+        var cols = new List<Collider2D>(nodeCount);
+
+        // place nodes on circle (CCW)
         for (int i = 0; i < nodeCount; i++)
         {
-            float ang = (i / (float)nodeCount) * Mathf.PI * 2f; // 0..2π
+            float ang = (i / (float)nodeCount) * Mathf.PI * 2f;
             Vector2 local = new(Mathf.Cos(ang) * R, Mathf.Sin(ang) * R);
 
             var go = Instantiate(nodePrefab, transform);
@@ -126,8 +102,8 @@ public class WaterBalloon2D : MonoBehaviour
             if (rb == null) rb = go.AddComponent<Rigidbody2D>();
             rb.mass = nodeMass;
             rb.gravityScale = gravityScale;
-            rb.linearDamping = linearDrag;   // 프로젝트 버전에 따라 drag 사용
-            rb.angularDamping = angularDrag; // (기존 코드와 동일)
+            rb.linearDamping = linearDrag;
+            rb.angularDamping = angularDrag;
             rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
             rb.interpolation = RigidbodyInterpolation2D.Interpolate;
             rb.freezeRotation = true;
@@ -139,33 +115,27 @@ public class WaterBalloon2D : MonoBehaviour
             sensor.balloonRoot = transform.root;
 
             rbs.Add(rb);
-            cols.Add(col);
             sensors.Add(sensor);
+            cols.Add(col);
         }
 
-        // ignore self collisions (world with nodes still collides)
+        // ignore self collisions
         if (ignoreSelfCollision)
         {
             for (int i = 0; i < cols.Count; i++)
                 for (int j = i + 1; j < cols.Count; j++)
-                    if (cols[i] && cols[j]) Physics2D.IgnoreCollision(cols[i], cols[j], true);
+                    Physics2D.IgnoreCollision(cols[i], cols[j], true);
         }
 
-        // membrane springs (edges + optional shear)
+        // membrane springs
         for (int i = 0; i < nodeCount; i++)
         {
-            int j = (i + 1) % nodeCount;
-            AddSpring(rbs[i], rbs[j], edgeFrequency, edgeDamping);
-
-            if (addShear)
-            {
-                int k = (i + 2) % nodeCount;
-                AddSpring(rbs[i], rbs[k], shearFrequency, shearDamping);
-            }
+            AddSpring(rbs[i], rbs[(i + 1) % nodeCount], edgeFrequency, edgeDamping);
+            if (addShear) AddSpring(rbs[i], rbs[(i + 2) % nodeCount], shearFrequency, shearDamping);
         }
 
-        // target area = initial polygon area (abs)
-        targetArea = Mathf.Abs(PolygonAreaWorldAbs());
+        // target area
+        targetArea = Mathf.Abs(PolygonAreaSigned());
     }
 
     void AddSpring(Rigidbody2D a, Rigidbody2D b, float freq, float damp)
@@ -179,8 +149,8 @@ public class WaterBalloon2D : MonoBehaviour
         sj.enableCollision = false;
     }
 
-    // Shoelace absolute area
-    float PolygonAreaWorldAbs()
+    // signed area (CCW > 0)
+    float PolygonAreaSigned()
     {
         float sum = 0f;
         for (int i = 0; i < rbs.Count; i++)
@@ -189,7 +159,7 @@ public class WaterBalloon2D : MonoBehaviour
             Vector2 q = rbs[(i + 1) % rbs.Count].position;
             sum += (p.x * q.y - q.x * p.y);
         }
-        return Mathf.Abs(sum) * 0.5f;
+        return sum * 0.5f;
     }
 
     Vector2 GetCentroid()
@@ -203,71 +173,75 @@ public class WaterBalloon2D : MonoBehaviour
     {
         if (rbs.Count < 3) return;
 
-        // ---- Internal pressure (radial, momentum-conserving) ----
-        float area = PolygonAreaWorldAbs();
-        float areaErrorRatio = (targetArea - area) / Mathf.Max(targetArea, 1e-5f); // -1..+1 근처
+        float signedArea = PolygonAreaSigned();
+        float area = Mathf.Abs(signedArea);
+        float areaErrorRatio = (targetArea - area) / Mathf.Max(targetArea, 1e-5f);
         float kPressure = areaErrorRatio * pressureStiffness;
+        float orient = Mathf.Sign(signedArea); // CCW:+1, CW:-1 (뒤집혀도 바깥 법선 유지)
 
         Vector2 c = GetCentroid();
 
-        // apply radial pressure & damping
+        // --- Edge-normal pressure (끊김 방지 핵심) ---
+        // 각 변 길이에 비례해 바깥 법선으로 압력 분배(두 끝점에 반씩)
         for (int i = 0; i < rbs.Count; i++)
         {
-            Rigidbody2D rb = rbs[i];
-            Vector2 to = rb.position - c;
-            float d = to.magnitude;
-            Vector2 dir = (d > 1e-6f) ? (to / Mathf.Max(d, 1e-6f)) : Random.insideUnitCircle.normalized;
+            int j = (i + 1) % rbs.Count;
 
-            // radial pressure (합력≈0)
-            rb.AddForce(dir * kPressure, ForceMode2D.Force);
+            Vector2 p = rbs[i].position;
+            Vector2 q = rbs[j].position;
 
-            // radial velocity damping
+            Vector2 e = q - p;
+            float len = e.magnitude;
+            if (len < 1e-6f) continue;
+
+            // outward normal (orientation 보정)
+            Vector2 n = orient * new Vector2(e.y, -e.x) / len;
+
+            // pressure * edge length -> force; 양 끝점에 1/2씩
+            Vector2 F = n * (kPressure * len);
+            rbs[i].AddForce(F * 0.5f, ForceMode2D.Force);
+            rbs[j].AddForce(F * 0.5f, ForceMode2D.Force);
+
+            // normal-direction damping (출렁임 억제)
             if (pressureDamping > 0f)
             {
-                float vr = Vector2.Dot(rb.linearVelocity, dir);
-                rb.AddForce(-dir * vr * pressureDamping, ForceMode2D.Force);
+                float vni = Vector2.Dot(rbs[i].linearVelocity, n);
+                float vnj = Vector2.Dot(rbs[j].linearVelocity, n);
+                rbs[i].AddForce(-n * vni * pressureDamping, ForceMode2D.Force);
+                rbs[j].AddForce(-n * vnj * pressureDamping, ForceMode2D.Force);
             }
         }
 
-        // ---- Minimum radius clamp (anti-collapse) ----
+        // --- Min / Max radius clamps (원 코드 유지, 단일 루프) ---
         for (int i = 0; i < rbs.Count; i++)
         {
             Rigidbody2D rb = rbs[i];
             Vector2 to = rb.position - c;
             float d = to.magnitude;
+            if (d < 1e-6f) continue;
+            Vector2 dir = to / d;
+
+            // min clamp
             if (d < minRadius)
             {
-                Vector2 dir = (d > 1e-6f) ? (to / d) : Random.insideUnitCircle.normalized;
-                rb.position = c + dir * minRadius;           // 위치 푸시-아웃
-                float inward = Vector2.Dot(rb.linearVelocity, -dir); // 안쪽 성분 제거
+                rb.position = c + dir * minRadius;
+                float inward = Vector2.Dot(rb.linearVelocity, -dir);
                 if (inward > 0f) rb.linearVelocity += dir * inward;
+                continue;
             }
-        }
 
-        // ---- Maximum radius clamp (limit spread) ★ 추가 ----
-        for (int i = 0; i < rbs.Count; i++)
-        {
-            Rigidbody2D rb = rbs[i];
-            Vector2 to = rb.position - c;
-            float d = to.magnitude;
-
+            // max clamp
             if (d > maxRadius)
             {
-                Vector2 dir = (d > 1e-6f) ? (to / d) : Random.insideUnitCircle.normalized;
-
                 if (softMaxClamp)
                 {
-                    // 소프트: 넘친 양 만큼 안쪽으로 당기는 힘 + 바깥 성분 감쇠
                     float excess = d - maxRadius;
                     rb.AddForce(-dir * (excess * Mathf.Max(0f, maxClampStiffness)), ForceMode2D.Force);
-
                     float outward = Vector2.Dot(rb.linearVelocity, dir);
-                    if (outward > 0f)
-                        rb.linearVelocity -= dir * (outward * Mathf.Clamp01(maxClampDamping));
+                    if (outward > 0f) rb.linearVelocity -= dir * (outward * Mathf.Clamp01(maxClampDamping));
                 }
                 else
                 {
-                    // 하드: 바로 잘라내고 바깥 성분 제거
                     rb.position = c + dir * maxRadius;
                     float outward = Vector2.Dot(rb.linearVelocity, dir);
                     if (outward > 0f) rb.linearVelocity -= dir * outward;
@@ -275,17 +249,14 @@ public class WaterBalloon2D : MonoBehaviour
             }
         }
 
-        // ---- Cancel horizontal COM
-
-        // ---- Cancel horizontal COM drift when truly idle (no contact, small area error) ----
-        if (cancelHorizontalDriftWhenIdle)
+        // --- idle일 때 수평 COM 드리프트 제거(원 코드 유지) ---
+        if (cancelHorizontalDriftWhenIdle && Mathf.Abs(areaErrorRatio) < idleAreaErrorEpsilon)
         {
             int external = 0;
             for (int i = 0; i < sensors.Count; i++) external += sensors[i].externalContacts;
 
-            if (external == 0 && Mathf.Abs(areaErrorRatio) < idleAreaErrorEpsilon)
+            if (external == 0)
             {
-                // 평균 수평 속도
                 float vxAvg = 0f;
                 for (int i = 0; i < rbs.Count; i++) vxAvg += rbs[i].linearVelocity.x;
                 vxAvg /= rbs.Count;
@@ -296,7 +267,7 @@ public class WaterBalloon2D : MonoBehaviour
                     for (int i = 0; i < rbs.Count; i++)
                     {
                         var v = rbs[i].linearVelocity;
-                        v.x -= corr;            // 수직 낙하는 그대로 두고, 수평 드리프트만 제거
+                        v.x -= corr;
                         rbs[i].linearVelocity = v;
                     }
                 }
