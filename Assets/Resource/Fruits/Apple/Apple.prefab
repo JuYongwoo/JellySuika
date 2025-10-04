@@ -76,7 +76,8 @@ MonoBehaviour:
   gravityScale: 1
   linearDrag: 0.1
   angularDrag: 0.05
-  fruitType: 1
+  fruitType: 3
+  isMerging: 0
 --- !u!23 &1549950860481711729
 MeshRenderer:
   m_ObjectHideFlags: 0

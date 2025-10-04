@@ -23,8 +23,6 @@ public class ResourceManager
 
         fruitsObjMap = Util.LoadDictWithEnum<Fruits, GameObject>();
 
-
-
     }
 
 }
