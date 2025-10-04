@@ -52,11 +52,8 @@ MonoBehaviour:
   usePrefabRadius: 1
   radius: 1.2
   ignoreSelfCollision: 1
-  addShear: 1
   edgeFrequency: 12
   edgeDamping: 0.6
-  shearFrequency: 8
-  shearDamping: 0.6
   pressureStiffness: 40
   pressureDamping: 0.2
   minRadiusFactor: 0.6
@@ -71,6 +68,7 @@ MonoBehaviour:
   gravityScale: 1
   linearDrag: 0.1
   angularDrag: 0.05
+  fruitType: 4
 --- !u!33 &-8357330968635522391
 MeshFilter:
   m_ObjectHideFlags: 0

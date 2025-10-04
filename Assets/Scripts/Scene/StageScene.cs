@@ -46,12 +46,7 @@ public class StageScene : MonoBehaviour
 
                 Fruits fr = fruitQueue.Dequeue();
                 currentFruit = Instantiate(ManagerObject.instance.resourceManager.fruitsObjMap[fr].Result, new Vector2(0, height), new Quaternion());
-                currentFruit.GetComponent<WaterBalloon>().setType(fr);
-
-
-                /////////////중력 잠금
                 currentFruit.GetComponent<WaterBalloon>().setGravity(false);
-                currentFruit.GetComponent<WaterBalloon>().setNodeDistance(false);
                 isLocked = true;
 
 
@@ -72,7 +67,6 @@ public class StageScene : MonoBehaviour
                 if (!isLocked)
                 {
                     currentFruit.GetComponent<WaterBalloon>().setGravity(true);
-                    currentFruit.GetComponent<WaterBalloon>().setNodeDistance(true);
                     setState(State.Moving_End);
                 }
                 break;

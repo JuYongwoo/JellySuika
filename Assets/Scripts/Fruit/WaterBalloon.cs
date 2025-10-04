@@ -1,4 +1,6 @@
+using System.Collections;
 using System.Collections.Generic;
+using System.Net.Http.Headers;
 using Unity.Android.Gradle.Manifest;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
@@ -49,6 +51,7 @@ public class WaterBalloon : MonoBehaviour
 
 
     public Fruits fruitType;
+    public bool isMerging = false;
 
     private class NodeSensor : MonoBehaviour
     {
@@ -66,9 +69,17 @@ public class WaterBalloon : MonoBehaviour
                     WaterBalloon twb = this.transform.root.GetComponent<WaterBalloon>();
                     if (cwb.fruitType == twb.fruitType)
                     {
+                        if (cwb.isMerging || twb.isMerging) return;
+                        cwb.isMerging = true;
+                        twb.isMerging = true;
+
+                        Vector3 midPoint = (c.transform.position + gameObject.transform.position) * 0.5f;
+
                         cwb.destroySelf();
                         twb.destroySelf();
                         //서로의 부모 없앤다
+
+                        Instantiate(ManagerObject.instance.resourceManager.fruitsObjMap[twb.fruitType + 1].Result, midPoint, new Quaternion());
 
                         //중간 지점에 type+1의 프리팹(리소스매니저에서) 소환
                         //만약 suika면 소환하지않음
@@ -90,10 +101,20 @@ public class WaterBalloon : MonoBehaviour
         Build();
     }
 
-    public void setType(Fruits fr)
+    private void Start()
     {
-        fruitType = fr;
+
+        StartCoroutine(spread()); //소환할때 원점으로부터 0.1f 거리에 모아놓고 넓힌다(다른 과일들을 밀어내기 위해)
     }
+
+    private IEnumerator spread()
+    {
+        setNodeDistance(false);
+        yield return new WaitForSeconds(0.1f);
+        setNodeDistance(true);
+    }
+
+
 
     public void destroySelf()
     {
@@ -120,7 +141,7 @@ public class WaterBalloon : MonoBehaviour
 
 
 
-    public void setNodeDistance(bool isOn) //내부 스프링조인트들이 중앙과의 최대거리 (과일이 소환되면 처음엔 0.1f, 이후에 원래 반지름으로 하여 다른 과일들을 밀어낼 수 있도록 조정해야)
+    private void setNodeDistance(bool isOn) //내부 스프링조인트들이 중앙과의 최대거리 (과일이 소환되면 처음엔 0.1f, 이후에 원래 반지름으로 하여 다른 과일들을 밀어낼 수 있도록 조정해야)
     {
         if (isOn)
         {
@@ -172,7 +193,6 @@ public class WaterBalloon : MonoBehaviour
         {
             float ang = (i / (float)nodeCount) * Mathf.PI * 2f;
             Vector2 local = new(Mathf.Cos(ang) * R, Mathf.Sin(ang) * R);
-            //Vector2 local = new(Mathf.Cos(ang) * 0.1f, Mathf.Sin(ang) * 0.1f); //중앙으로부터 0.1f에서 퍼지도록(밑에서 소환된 경우 다른 과일 밀어내기 위해)
 
             var go = Instantiate(nodePrefab, transform);
             go.name = $"node_{i}";
@@ -224,7 +244,7 @@ public class WaterBalloon : MonoBehaviour
         var sj = a.gameObject.AddComponent<SpringJoint2D>();
         sj.connectedBody = b;
         sj.autoConfigureDistance = false;
-        sj.distance = Vector2.Distance(a.position, b.position);
+        sj.distance = Vector2.Distance(a.position, b.position); //시작할때는 0.1로 해야할 수도
         sj.frequency = Mathf.Max(0.01f, freq);
         sj.dampingRatio = Mathf.Clamp01(damp);
         sj.enableCollision = false;
