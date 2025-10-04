@@ -104,6 +104,7 @@ public class StageScene : MonoBehaviour
 
         Fruits fr = fruitQueue.Dequeue();
         currentFruit = Instantiate(ManagerObject.instance.resourceManager.fruitsObjMap[fr].Result, new Vector2(0, height), new Quaternion());
+        currentFruit.GetComponent<WaterBalloon>().setType(fr);
 
 
         //y√‡ ∞Ì¡§

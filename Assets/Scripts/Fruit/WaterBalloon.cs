@@ -44,25 +44,67 @@ public class WaterBalloon : MonoBehaviour
     private float minRadius;
     private float maxRadius;
 
+
+    public Fruits fruitType;
+
     private class NodeSensor : MonoBehaviour
     {
         public Transform balloonRoot;
         public int externalContacts;
 
         void OnCollisionEnter2D(Collision2D c)
-        { if (c.transform.root != balloonRoot) externalContacts++; }
+        {
+            if (c.transform.root != balloonRoot)
+            {
+                WaterBalloon cwb = c.transform.root.GetComponent<WaterBalloon>();
+                if (cwb)
+                {
+                    externalContacts++;
+                    WaterBalloon twb = this.transform.root.GetComponent<WaterBalloon>();
+                    if (cwb.fruitType == twb.fruitType)
+                    {
+                        cwb.destroySelf();
+                        twb.destroySelf();
+                        //서로의 부모 없앤다
+                    }
+                }
+
+            }
+
+
+        
+        }
 
         void OnCollisionExit2D(Collision2D c)
         { if (c.transform.root != balloonRoot) externalContacts = Mathf.Max(0, externalContacts - 1); }
 
         void OnCollisionStay2D(Collision2D c)
         { if (c.transform.root != balloonRoot && externalContacts <= 0) externalContacts = 1; }
+
     }
 
     void Awake()
     {
         Build();
     }
+
+    public void setType(Fruits fr)
+    {
+        fruitType = fr;
+    }
+
+    public void destroySelf()
+    {
+        Destroy(gameObject);
+    }
+
+
+
+
+
+    /// <summary>
+    /// 아래부터 스프링조인트 컨트롤 영역
+    /// </summary>
 
     public void Build()
     {
