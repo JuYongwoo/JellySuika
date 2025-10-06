@@ -30,6 +30,12 @@ public class StageScene : MonoBehaviour
     private bool isLocked = false;
 
 
+    private void Start()
+    {
+        ManagerObject.instance.soundManager.PlayAudioClip(ManagerObject.instance.resourceManager.soundsMap[Sounds.BGM1].Result, 0.2f, true);
+    }
+
+
     private void Update()
     {
         //Debug.Log($"Current State = {gameState}");
@@ -98,6 +104,7 @@ public class StageScene : MonoBehaviour
         ManagerObject.instance.actionManager.MoveLeftRightWithKeyBoard -= moveWithKeyBorad;
         ManagerObject.instance.actionManager.LockReleaesCurrentFruit -= lockReleaseCurrentFruit;
         ManagerObject.instance.actionManager.ReleaseCurrentFruitWithMouse -= releaseCurrentFruitWithMouse;
+        ManagerObject.instance.soundManager.StopAudioClip(ManagerObject.instance.resourceManager.soundsMap[Sounds.BGM1].Result);
 
 
     }

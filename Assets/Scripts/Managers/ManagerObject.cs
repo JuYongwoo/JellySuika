@@ -6,6 +6,7 @@ public class ManagerObject : MonoBehaviour
     public InputManager inputManager = new InputManager();
     public ResourceManager resourceManager = new ResourceManager();
     public ActionManager actionManager = new ActionManager();
+    public SoundManager soundManager = new SoundManager();
 
     private void Awake()
     {
