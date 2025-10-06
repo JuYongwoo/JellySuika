@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Net.Http.Headers;
@@ -79,10 +80,13 @@ public class WaterBalloon : MonoBehaviour
                         twb.destroySelf();
                         //서로의 부모 없앤다
 
-                        ManagerObject.instance.resourceManager.fruitsObjMap.TryGetValue(twb.fruitType + 1, out var fr);
-                        if (fr.Result != null)
+                        if ((int)twb.fruitType + 1 < Enum.GetValues(typeof(Fruits)).Length)
                         {
-                            Instantiate(fr.Result, midPoint, new Quaternion());
+                            ManagerObject.instance.resourceManager.fruitsObjMap.TryGetValue(twb.fruitType + 1, out var fr);
+                            if (fr.Result != null)
+                            {
+                                Instantiate(fr.Result, midPoint, new Quaternion());
+                            }
                         }
                         //중간 지점에 type+1의 프리팹(리소스매니저에서) 소환
                         //만약 suika면 소환하지않음
