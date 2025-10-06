@@ -13,15 +13,13 @@ public class InputManager
     {
 
 
-
-        //둘다 사용 가능하게 할 예정
-        //바깥부분 누르면 거기서 가장 가까운 소환 가능영역에 소환
-
+        /*
         //마우스 사용할 때
         if (Input.GetMouseButtonDown(0))
         {
             ManagerObject.instance.actionManager.OnClickEvent();
         }
+        */
 
         //키보드 사용할 때
         if (Input.GetKeyDown(KeyCode.Space))

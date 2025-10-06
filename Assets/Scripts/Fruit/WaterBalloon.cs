@@ -79,8 +79,11 @@ public class WaterBalloon : MonoBehaviour
                         twb.destroySelf();
                         //서로의 부모 없앤다
 
-                        Instantiate(ManagerObject.instance.resourceManager.fruitsObjMap[twb.fruitType + 1].Result, midPoint, new Quaternion());
-
+                        ManagerObject.instance.resourceManager.fruitsObjMap.TryGetValue(twb.fruitType + 1, out var fr);
+                        if (fr.Result != null)
+                        {
+                            Instantiate(fr.Result, midPoint, new Quaternion());
+                        }
                         //중간 지점에 type+1의 프리팹(리소스매니저에서) 소환
                         //만약 suika면 소환하지않음
                     }

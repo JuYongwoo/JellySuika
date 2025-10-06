@@ -56,7 +56,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   nodePrefab: {fileID: 6245279223952659903, guid: 87ffe25b06162b94f851785a7bc9c53e, type: 3}
-  nodeCount: 32
+  nodeCount: 24
   usePrefabRadius: 1
   radius: 0.7
   ignoreSelfCollision: 1

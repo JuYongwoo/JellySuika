@@ -50,7 +50,7 @@ MonoBehaviour:
   nodePrefab: {fileID: 6245279223952659903, guid: 46f05c9b552970648b265cb179e9b3cf, type: 3}
   nodeCount: 32
   usePrefabRadius: 1
-  radius: 1.5
+  radius: 1.1
   ignoreSelfCollision: 1
   edgeFrequency: 12
   edgeDamping: 0.6
@@ -69,6 +69,7 @@ MonoBehaviour:
   linearDrag: 0.1
   angularDrag: 0.05
   fruitType: 5
+  isMerging: 0
 --- !u!33 &-2644091011516131185
 MeshFilter:
   m_ObjectHideFlags: 0
