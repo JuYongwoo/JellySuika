@@ -7,6 +7,7 @@ public class ActionManager
     public event Action ReleaseCurrentFruitWithMouse;
     public event Action<bool> MoveLeftRightWithKeyBoard;
     public event Action<bool> LockReleaesCurrentFruit;
+    public event Action<int> setScoreText;
 
 
     public void OnClickEvent()
@@ -22,5 +23,10 @@ public class ActionManager
     public void OnLockReleaesCurrentFruit(bool isLock)
     {
         LockReleaesCurrentFruit?.Invoke(isLock);
+    }
+
+    public void OnsetScoreText(int score)
+    {
+        setScoreText?.Invoke(score);
     }
 }

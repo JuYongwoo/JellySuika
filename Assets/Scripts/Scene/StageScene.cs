@@ -1,7 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System;
-using System.Linq;
 using System.Collections;
 
 
@@ -23,6 +22,7 @@ public class StageScene : MonoBehaviour
     public const float height = 3.8f;
     public const float xDeadZone = 2f;
 
+
     private Coroutine currentCoroutine = null;
 
     public int listSize = 6;
@@ -32,7 +32,7 @@ public class StageScene : MonoBehaviour
 
     private void Start()
     {
-        ManagerObject.instance.soundManager.PlayAudioClip(ManagerObject.instance.resourceManager.soundsMap[Sounds.BGM1].Result, 0.2f, true);
+        ManagerObject.instance.soundManager.PlayAudioClip(ManagerObject.instance.resourceManager.bgmMap[Sounds.BGM1].Result, 0.2f, true);
     }
 
 
@@ -104,7 +104,7 @@ public class StageScene : MonoBehaviour
         ManagerObject.instance.actionManager.MoveLeftRightWithKeyBoard -= moveWithKeyBorad;
         ManagerObject.instance.actionManager.LockReleaesCurrentFruit -= lockReleaseCurrentFruit;
         ManagerObject.instance.actionManager.ReleaseCurrentFruitWithMouse -= releaseCurrentFruitWithMouse;
-        ManagerObject.instance.soundManager.StopAudioClip(ManagerObject.instance.resourceManager.soundsMap[Sounds.BGM1].Result);
+        ManagerObject.instance.soundManager.StopAudioClip(ManagerObject.instance.resourceManager.bgmMap[Sounds.BGM1].Result);
 
 
     }

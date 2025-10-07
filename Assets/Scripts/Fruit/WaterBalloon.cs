@@ -54,7 +54,7 @@ public class WaterBalloon : MonoBehaviour
     public Fruits fruitType;
     public bool isMerging = false;
 
-    private class NodeSensor : MonoBehaviour
+    private class NodeSensor : MonoBehaviour //자식 노드들
     {
         public Transform balloonRoot;
         //public int externalContacts;
@@ -74,6 +74,8 @@ public class WaterBalloon : MonoBehaviour
                         cwb.isMerging = true;
                         twb.isMerging = true;
 
+                        ManagerObject.instance.actionManager.OnsetScoreText(++ManagerObject.instance.resourceManager.stageDataSO.Result.Score);
+
                         Vector3 midPoint = (c.transform.position + gameObject.transform.position) * 0.5f;
 
                         cwb.destroySelf();
@@ -85,8 +87,13 @@ public class WaterBalloon : MonoBehaviour
                             ManagerObject.instance.resourceManager.fruitsObjMap.TryGetValue(twb.fruitType + 1, out var fr);
                             if (fr.Result != null)
                             {
+                                ManagerObject.instance.soundManager.PlayAudioClip(ManagerObject.instance.resourceManager.sfxMap[SFX.FruitFusion].Result, 0.2f, false);
                                 Instantiate(fr.Result, midPoint, new Quaternion());
                             }
+                        }
+                        else
+                        {
+                            ManagerObject.instance.soundManager.PlayAudioClip(ManagerObject.instance.resourceManager.sfxMap[SFX.ScoreGet].Result, 0.2f, false);
                         }
                         //중간 지점에 type+1의 프리팹(리소스매니저에서) 소환
                         //만약 suika면 소환하지않음

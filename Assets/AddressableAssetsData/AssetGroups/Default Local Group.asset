@@ -15,8 +15,23 @@ MonoBehaviour:
   m_GroupName: Default Local Group
   m_GUID: 9b3109e377a9fd7498d5314fd61daa24
   m_SerializeEntries:
+  - m_GUID: 23fa618b8becba5478e48dec8a259189
+    m_Address: StageDataSO
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 278158555417bf04ba55561c3de76422
+    m_Address: FruitFusion
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6537c2afc4597db42a4c894a24d41afd
     m_Address: Grape
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b37cd43f53cfbce45a7f8c276e691c89
+    m_Address: ScoreGet
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
