@@ -135,7 +135,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 68928cf5eb1d54649a7871828161e3c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sprite: {fileID: -6403348867786874424, guid: eb9bcaa023ac9024a8af254c7b7e238c, type: 3}
   autoCreateMaterial: 1
   shaderName: Sprites/Default
   sortingLayer: 

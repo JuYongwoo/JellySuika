@@ -139,7 +139,7 @@ public class WaterBalloonMesh : MonoBehaviour
         if (!mr) return;
 
         bool useShared = !Application.isPlaying;
-        var mat = useShared ? mr.sharedMaterial : mr.material;
+        var mat = mr.sharedMaterial;
         if (mat != null) mat.mainTexture = sprite ? sprite.texture : null;
     }
 
