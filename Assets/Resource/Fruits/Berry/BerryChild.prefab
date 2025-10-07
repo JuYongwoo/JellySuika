@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 190635418786466942}
   - component: {fileID: 5278910593676652301}
   m_Layer: 0
-  m_Name: BerryContent
+  m_Name: BerryChild
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

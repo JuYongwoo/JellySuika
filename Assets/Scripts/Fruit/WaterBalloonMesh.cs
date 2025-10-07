@@ -1,16 +1,12 @@
 using System.Collections.Generic;
 using UnityEngine;
-#if UNITY_EDITOR
-using UnityEditor;
-using UnityEditor.SceneManagement;
-#endif
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 [DefaultExecutionOrder(100)]
 public class WaterBalloonMesh : MonoBehaviour
 {
     [Header("Sprite & Material")]
-    public Sprite sprite;
+    private Sprite sprite;
     public bool autoCreateMaterial = true;
     public string shaderName = "Sprites/Default";
     public string sortingLayer = "";
@@ -64,6 +60,8 @@ public class WaterBalloonMesh : MonoBehaviour
         EnsureMaterial();
         ApplySpriteToMaterial();
         ApplySorting();
+
+        sprite = ManagerObject.instance.resourceManager.fruitsInfoMap[GetComponent<WaterBalloon>().fruitType].Result.fruitSprite;
     }
 
     void Start()
@@ -87,15 +85,6 @@ public class WaterBalloonMesh : MonoBehaviour
         EnsureMaterial();
         ApplySpriteToMaterial();
         ApplySorting();
-#if UNITY_EDITOR
-        if (!Application.isPlaying)
-            EditorApplication.delayCall += () =>
-            {
-                if (this == null) return;
-                if (autoFindNodes) RefreshNodes(silent: true);
-                if (nodeTs.Count >= 3 && mf && mf.sharedMesh) BuildMesh();
-            };
-#endif
     }
 
     System.Collections.IEnumerator WaitNodesThenBuild()
@@ -121,56 +110,35 @@ public class WaterBalloonMesh : MonoBehaviour
             Debug.LogWarning("[BalloonSpriteSkin2D] 노드가 3개 미만입니다.");
     }
 
-#if UNITY_EDITOR
-    static bool IsPrefabAsset(GameObject go)
-    {
-        if (PrefabUtility.IsPartOfPrefabAsset(go)) return true;
-        var stage = PrefabStageUtility.GetCurrentPrefabStage();
-        if (stage != null && go.scene == stage.scene) return true;
-        return false;
-    }
-#endif
 
     void EnsureMaterial()
     {
         if (!mr) return;
-        var shader = Shader.Find(shaderName) ?? Shader.Find("Sprites/Default");
 
-        bool useShared =
-#if UNITY_EDITOR
-            !Application.isPlaying || IsPrefabAsset(gameObject);
-#else
-            !Application.isPlaying;
-#endif
-        if (useShared)
+        // Prefab 상태일 때는 sharedMaterial만 접근 가능
+        if (mr.gameObject.scene.rootCount == 0)
         {
-            if (mr.sharedMaterial == null || mr.sharedMaterial.shader == null)
+            if (mr.sharedMaterial == null)
             {
-                var m = new Material(shader);
-#if UNITY_EDITOR
-                m.hideFlags = HideFlags.DontSaveInEditor | HideFlags.DontSaveInBuild;
-#endif
-                mr.sharedMaterial = m;
+                var shader = Shader.Find(shaderName) ?? Shader.Find("Sprites/Default");
+                mr.sharedMaterial = new Material(shader);
             }
+            return;
         }
-        else
-        {
-            if (mr.material == null || mr.material.shader == null)
-                mr.material = new Material(shader);
-        }
+
+        // 일반 런타임 오브젝트일 경우
+        var runtimeShader = Shader.Find(shaderName) ?? Shader.Find("Sprites/Default");
+        if (mr.material == null || mr.material.shader == null)
+            mr.material = new Material(runtimeShader);
     }
+
 
     void ApplySpriteToMaterial()
     {
         _lastSprite = sprite;
         if (!mr) return;
 
-        bool useShared =
-#if UNITY_EDITOR
-            !Application.isPlaying || IsPrefabAsset(gameObject);
-#else
-            !Application.isPlaying;
-#endif
+        bool useShared = !Application.isPlaying;
         var mat = useShared ? mr.sharedMaterial : mr.material;
         if (mat != null) mat.mainTexture = sprite ? sprite.texture : null;
     }

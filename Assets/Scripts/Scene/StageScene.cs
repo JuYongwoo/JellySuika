@@ -51,7 +51,7 @@ public class StageScene : MonoBehaviour
                 //위에 생성하고
 
                 Fruits fr = fruitQueue.Dequeue();
-                currentFruit = Instantiate(ManagerObject.instance.resourceManager.fruitsObjMap[fr].Result, new Vector2(0, height), new Quaternion());
+                currentFruit = Instantiate(ManagerObject.instance.resourceManager.fruitsInfoMap[fr].Result.parentPrefab, new Vector2(0, height), new Quaternion());
                 currentFruit.GetComponent<WaterBalloon>().setGravity(false);
                 isLocked = true;
 

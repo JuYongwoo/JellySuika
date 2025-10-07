@@ -15,6 +15,16 @@ MonoBehaviour:
   m_GroupName: Default Local Group
   m_GUID: 9b3109e377a9fd7498d5314fd61daa24
   m_SerializeEntries:
+  - m_GUID: 0b3a8ffe9ac5a394cb98cd489e16c32c
+    m_Address: Grape
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 131d7291b9107844faf0a532842aa3c6
+    m_Address: Apple
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 23fa618b8becba5478e48dec8a259189
     m_Address: StageDataSO
     m_ReadOnly: 0
@@ -25,13 +35,28 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 6537c2afc4597db42a4c894a24d41afd
-    m_Address: Grape
+  - m_GUID: 41ca3e061bd88ab4c8529752846367f3
+    m_Address: Orange
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5da22b43a04c7e34a82e6f3b59cc8e17
+    m_Address: Suika
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7778c63710849a84f90acc01e1b4eacf
+    m_Address: Melon
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b37cd43f53cfbce45a7f8c276e691c89
     m_Address: ScoreGet
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bb0c08314de58904496e90546f727456
+    m_Address: Berry
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

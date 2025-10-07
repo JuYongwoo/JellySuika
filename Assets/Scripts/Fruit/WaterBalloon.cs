@@ -1,9 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Net.Http.Headers;
-using Unity.Android.Gradle.Manifest;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.SocialPlatforms;
 
@@ -84,11 +81,11 @@ public class WaterBalloon : MonoBehaviour
 
                         if ((int)twb.fruitType + 1 < Enum.GetValues(typeof(Fruits)).Length)
                         {
-                            ManagerObject.instance.resourceManager.fruitsObjMap.TryGetValue(twb.fruitType + 1, out var fr);
+                            ManagerObject.instance.resourceManager.fruitsInfoMap.TryGetValue(twb.fruitType + 1, out var fr);
                             if (fr.Result != null)
                             {
                                 ManagerObject.instance.soundManager.PlayAudioClip(ManagerObject.instance.resourceManager.sfxMap[SFX.FruitFusion].Result, 0.2f, false);
-                                Instantiate(fr.Result, midPoint, new Quaternion());
+                                Instantiate(fr.Result.parentPrefab, midPoint, new Quaternion());
                             }
                         }
                         else

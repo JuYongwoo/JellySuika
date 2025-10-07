@@ -14,37 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_GroupName: Fruits
   m_GUID: c5ef47f82a9530045917a0e2cd459e39
-  m_SerializeEntries:
-  - m_GUID: 182fec2778be13f42924f3908c438431
-    m_Address: Suika
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - Fruits
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 4177f991114cb8547b596596b31e6e92
-    m_Address: Berry
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - Fruits
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 4f57966b742f3f54c83a36f22c170402
-    m_Address: Melon
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - Fruits
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 629b739d87e14b848a6516c107b5d863
-    m_Address: Orange
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - Fruits
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d18bd9c1c436b344c8bb50aba57741fd
-    m_Address: Apple
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - Fruits
-    FlaggedDuringContentUpdateRestriction: 0
+  m_SerializeEntries: []
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 58e35f9c49e38624290fb2eac3c307dc, type: 2}
   m_SchemaSet:
