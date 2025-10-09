@@ -125,7 +125,8 @@ public class WaterBalloonMesh : MonoBehaviour
         dir = (len > 1e-6f) ? (dir / len) : Vector2.up;
 
         // 각 자식 오브젝트 위치에서 중심 방향으로 radius 만큼 더 외곽으로
-        polyWorld[i] = p + dir * nodes[0].transform.localScale.x/2;
+        polyWorld[i] = p + dir * nodes[0].transform.localScale.x/2; //각 자식오브젝트의 스케일 값의 1/2, 즉 반지름만큼 더하도록 해서 중심까지가 아닌, 중심+ 반지른으로 실제 경계까지 그리도록 함
+            //단, x값과 y값이 같아서 localscale.x값을 사용하도록 하는데, x값과 y값이 달라져야할 경우 추가 계산 필요해질 것임
     }
 
 
