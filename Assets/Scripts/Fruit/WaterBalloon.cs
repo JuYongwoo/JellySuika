@@ -7,34 +7,26 @@ using UnityEngine.SocialPlatforms;
 [DisallowMultipleComponent]
 public class WaterBalloon : MonoBehaviour
 {
-    [Header("Nodes")]
-    public GameObject nodePrefab;
+    private GameObject nodePrefab;
     [Range(8, 128)] public int nodeCount = 32;
     public bool usePrefabRadius = true;
-    public float radius = 0.5f;
-    public bool ignoreSelfCollision = true;
 
-    [Header("Membrane (edge springs)")]
     public float edgeFrequency = 12f;
     [Range(0f, 1f)] public float edgeDamping = 0.6f;
 
-    [Header("Internal Pressure / Area Preserve (radial)")]
     public float pressureStiffness = 40f;
     [Range(0f, 2f)] public float pressureDamping = 0.2f;
 
-    [Header("Clamp (min/max spread)")]
     [Range(0.1f, 0.95f)] public float minRadiusFactor = 0.6f;
     [Range(1.0f, 5f)] public float maxRadiusFactor = 1.25f;
     public bool softMaxClamp = true;
     public float maxClampStiffness = 60f;
     [Range(0f, 1f)] public float maxClampDamping = 0.3f;
 
-    [Header("Drift Kill (idle only)")]
     public bool cancelHorizontalDriftWhenIdle = true;
     [Range(0f, 1f)] public float driftCancelStrength = 0.35f;
     public float idleAreaErrorEpsilon = 0.02f;
 
-    [Header("Node Rigidbodies")]
     public float nodeMass = 0.05f;
     public float gravityScale = 1f;
     public float linearDrag = 0.1f;
@@ -185,14 +177,9 @@ public class WaterBalloon : MonoBehaviour
         for (int i = transform.childCount - 1; i >= 0; i--) Destroy(transform.GetChild(i).gameObject);
         rbs.Clear(); sensors.Clear();
 
-        if (nodePrefab == null)
-        {
-            Debug.LogError("[WaterBalloon2D] nodePrefab missing");
-            return;
-        }
+        nodePrefab = ManagerObject.instance.resourceManager.fruitsInfoMap[fruitType].Result.childPrefab;
 
-        float R = usePrefabRadius ? Mathf.Max(0.001f, GetPrefabRadius(nodePrefab))
-                                  : Mathf.Max(0.001f, radius);
+        float R = Mathf.Max(0.001f, nodePrefab.transform.localScale.x); //JYW 자식오브젝트의 스케일값을 따르나, 현재는 x와 y의 값이 같기 때문에 임시로 x값을 사용하도록 함
 
         minRadius = R * minRadiusFactor;
         maxRadius = R * Mathf.Max(1.0f, maxRadiusFactor);
@@ -231,13 +218,9 @@ public class WaterBalloon : MonoBehaviour
             cols.Add(col);
         }
 
-        // 서로의 콜리전은 무시한다.
-        if (ignoreSelfCollision)
-        {
-            for (int i = 0; i < cols.Count; i++)
-                for (int j = i + 1; j < cols.Count; j++)
-                    Physics2D.IgnoreCollision(cols[i], cols[j], true);
-        }
+        for (int i = 0; i < cols.Count; i++)
+            for (int j = i + 1; j < cols.Count; j++)
+                Physics2D.IgnoreCollision(cols[i], cols[j], true);
 
         // SpringJoint2D 추가
         for (int i = 0; i < nodeCount; i++)

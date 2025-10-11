@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38e0b56ab7497d646acac3046a9ad3c7, type: 3}
+  m_Name: Grape
+  m_EditorClassIdentifier: 
+  parentPrefab: {fileID: 7058974067128140919, guid: 6537c2afc4597db42a4c894a24d41afd, type: 3}
+  childPrefab: {fileID: 6245279223952659903, guid: ec5800832fa0c90478b43070fd7ada1e, type: 3}
+  fruitSprite: {fileID: -6403348867786874424, guid: eb9bcaa023ac9024a8af254c7b7e238c, type: 3}

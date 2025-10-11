@@ -8,7 +8,10 @@ public class TitlePanelUI : MonoBehaviour
 
     enum TitlePanelUIObjs
     {
-        TitlePlayBtn
+        TitlePlayBtn,
+        HowToPlayBtn,
+        HowToPlayImg,
+        HowToPlayExitBtn
     }
 
     private Dictionary<TitlePanelUIObjs, GameObject> titlePanelUIObjMap;
@@ -21,8 +24,25 @@ public class TitlePanelUI : MonoBehaviour
 
     private void Start()
     {
-        titlePanelUIObjMap.TryGetValue(TitlePanelUIObjs.TitlePlayBtn, out var btn);
-        btn.GetComponent<Button>().onClick.AddListener(     () => { SceneManager.LoadScene("Stage");      }   );
+        titlePanelUIObjMap.TryGetValue(TitlePanelUIObjs.HowToPlayImg, out var howToPlayImg);
+        howToPlayImg.SetActive(false); //게임 시작 시 게임방법 창 닫기
+
+
+        titlePanelUIObjMap.TryGetValue(TitlePanelUIObjs.TitlePlayBtn, out var playBtn);
+        playBtn.GetComponent<Button>().onClick.AddListener(     () => { SceneManager.LoadScene("Stage");      }   );
+        
+        titlePanelUIObjMap.TryGetValue(TitlePanelUIObjs.HowToPlayBtn, out var howToPlayBtn);
+        howToPlayBtn.GetComponent<Button>().onClick.AddListener(     () => {
+            howToPlayImg.SetActive(true);
+        });
+
+        titlePanelUIObjMap.TryGetValue(TitlePanelUIObjs.HowToPlayExitBtn, out var exitBtn);
+        exitBtn.GetComponent<Button>().onClick.AddListener(     () => {
+
+            howToPlayImg.SetActive(false);
+
+
+        });
     }
 
     // Update is called once per frame
