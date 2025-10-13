@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 966236855163982634}
   - component: {fileID: -2644091011516131185}
   - component: {fileID: 3409130180912355911}
-  - component: {fileID: 128942250783408827}
   m_Layer: 0
   m_Name: SuikaParent
   m_TagString: Untagged
@@ -47,11 +46,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c75945180194c204bba432e5a94dd3bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nodePrefab: {fileID: 6245279223952659903, guid: 46f05c9b552970648b265cb179e9b3cf, type: 3}
   nodeCount: 32
   usePrefabRadius: 1
-  radius: 1.1
-  ignoreSelfCollision: 1
   edgeFrequency: 12
   edgeDamping: 0.6
   pressureStiffness: 40
@@ -70,6 +66,8 @@ MonoBehaviour:
   angularDrag: 0.05
   fruitType: 5
   isMerging: 0
+  shaderName: Sprites/Default
+  rebuildEveryFrame: 1
 --- !u!33 &-2644091011516131185
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -123,28 +121,3 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &128942250783408827
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7058974067128140919}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 68928cf5eb1d54649a7871828161e3c9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  autoCreateMaterial: 1
-  shaderName: Sprites/Default
-  sortingLayer: 
-  sortingOrder: 0
-  uvPadding: 0.02
-  useSpriteRect: 1
-  autoFindNodes: 1
-  rebuildEveryFrame: 1
-  findNodesMaxWaitFrames: 60
-  forceConvex: 1
-  inflateFromChildrenSize: 1
-  fallbackChildSize: 0
-  extraInflate: 0

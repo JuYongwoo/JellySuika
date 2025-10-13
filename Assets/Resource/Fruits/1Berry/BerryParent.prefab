@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 966236855163982634}
   - component: {fileID: -4341092856902527585}
   - component: {fileID: -3203004560402739848}
-  - component: {fileID: -7237061864480940498}
   m_Layer: 0
   m_Name: BerryParent
   m_TagString: Untagged
@@ -47,11 +46,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c75945180194c204bba432e5a94dd3bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nodePrefab: {fileID: 6245279223952659903, guid: 023a830430bf81245b6d56c87f85190a, type: 3}
   nodeCount: 12
   usePrefabRadius: 1
-  radius: 0.2
-  ignoreSelfCollision: 1
   edgeFrequency: 12
   edgeDamping: 0.6
   pressureStiffness: 40
@@ -70,6 +66,8 @@ MonoBehaviour:
   angularDrag: 0.05
   fruitType: 0
   isMerging: 0
+  shaderName: Sprites/Default
+  rebuildEveryFrame: 1
 --- !u!33 &-4341092856902527585
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -123,17 +121,3 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &-7237061864480940498
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7058974067128140919}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 68928cf5eb1d54649a7871828161e3c9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  shaderName: Sprites/Default
-  rebuildEveryFrame: 1

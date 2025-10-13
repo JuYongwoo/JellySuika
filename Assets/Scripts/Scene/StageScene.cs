@@ -1,7 +1,8 @@
-using UnityEngine;
-using System.Collections.Generic;
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Net;
+using UnityEngine;
 
 
 public class StageScene : MonoBehaviour
@@ -51,7 +52,8 @@ public class StageScene : MonoBehaviour
                 //위에 생성하고
 
                 Fruits fr = fruitQueue.Dequeue();
-                currentFruit = Instantiate(ManagerObject.instance.resourceManager.fruitsInfoMap[fr].Result.parentPrefab, new Vector2(0, height), new Quaternion());
+                currentFruit = ManagerObject.instance.poolManager.Spawn(ManagerObject.instance.resourceManager.fruitsInfoMap[fr].Result.parentPrefab, new Vector2(0, height), new Quaternion());
+                //currentFruit = Instantiate(ManagerObject.instance.resourceManager.fruitsInfoMap[fr].Result.parentPrefab, new Vector2(0, height), new Quaternion());
                 currentFruit.GetComponent<WaterBalloon>().setGravity(false);
                 isLocked = true;
 

@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: -5048148902508281964}
   - component: {fileID: 966236855163982634}
   - component: {fileID: 1549950860481711729}
-  - component: {fileID: -2087326421501818888}
   m_Layer: 0
   m_Name: AppleParent
   m_TagString: Untagged
@@ -55,11 +54,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c75945180194c204bba432e5a94dd3bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nodePrefab: {fileID: 6245279223952659903, guid: 87ffe25b06162b94f851785a7bc9c53e, type: 3}
   nodeCount: 24
   usePrefabRadius: 1
-  radius: 0.7
-  ignoreSelfCollision: 1
   edgeFrequency: 20
   edgeDamping: 0.6
   pressureStiffness: 100
@@ -78,6 +74,8 @@ MonoBehaviour:
   angularDrag: 0.05
   fruitType: 3
   isMerging: 0
+  shaderName: Sprites/Default
+  rebuildEveryFrame: 1
 --- !u!23 &1549950860481711729
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -123,28 +121,3 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &-2087326421501818888
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7058974067128140919}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 68928cf5eb1d54649a7871828161e3c9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  autoCreateMaterial: 1
-  shaderName: Sprites/Default
-  sortingLayer: 
-  sortingOrder: 0
-  uvPadding: 0.02
-  useSpriteRect: 1
-  autoFindNodes: 1
-  rebuildEveryFrame: 1
-  findNodesMaxWaitFrames: 60
-  forceConvex: 1
-  inflateFromChildrenSize: 1
-  fallbackChildSize: 0
-  extraInflate: 0
