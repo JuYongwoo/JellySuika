@@ -13,6 +13,23 @@ public class PoolManager
     private Dictionary<GameObject, Queue<GameObject>> _pools = new();
     private Dictionary<GameObject, GameObject> _instanceToPrefab = new();
 
+
+    private Transform _PooledObjects;
+    private Transform PooledObjects
+    {
+        get
+        {
+            if (_PooledObjects == null)
+            {
+                var rootObj = GameObject.Find("PooledObjects");
+                if (rootObj == null)
+                    rootObj = new GameObject("PooledObjects");
+                _PooledObjects = rootObj.transform;
+            }
+            return _PooledObjects;
+        }
+    }
+
     public void CleanPool()
     {
         _pools.Clear();
@@ -53,11 +70,26 @@ public class PoolManager
         return instance;
     }
 
+    public GameObject Spawn(GameObject prefab)
+    {
+        GameObject instance = SpawnInternal(prefab);
+        if (instance == null) return null;
+        return instance;
+    }
+
     public GameObject Spawn(GameObject prefab, Transform parent)
     {
         GameObject instance = SpawnInternal(prefab);
         if (instance == null) return null;
+
+
+
+        Vector3 originalScale = prefab.transform.localScale; //프리팹 원본 스케일 저장
         instance.transform.SetParent(parent, false);
+        instance.transform.localScale = originalScale;       // 원본 크기로 복원
+
+
+
         return instance;
     }
 
@@ -65,7 +97,12 @@ public class PoolManager
     {
         GameObject instance = SpawnInternal(prefab);
         if (instance == null) return null;
+
+
+
         instance.transform.SetPositionAndRotation(pos, rot);
+
+
         return instance;
     }
 
@@ -80,6 +117,7 @@ public class PoolManager
         PooledObejct[] classes = instance.GetComponents<PooledObejct>();
         for (int i = 0; i < classes.Length; i++) classes[i].PoolDestroy();
 
+        instance.transform.SetParent(PooledObjects, false);
         instance.SetActive(false);
 
         if (!_pools.TryGetValue(prefab, out var q))
