@@ -1,32 +1,31 @@
 using System;
-using Unity.VisualScripting;
 
 public class ActionManager
 {
 
-    public event Action ReleaseCurrentFruitWithMouse;
-    public event Action<bool> MoveLeftRightWithKeyBoard;
-    public event Action<bool> LockReleaesCurrentFruit;
-    public event Action<int> setScoreText;
+    public event Action ReleaseCurrentFruitWithMouseEvent;
+    public event Action<bool> MoveLeftRightWithKeyBoardEvent;
+    public event Action<bool> LockReleaesCurrentFruitEvent;
+    public event Action<int> SetScoreTextEvent;
 
 
-    public void OnClickEvent()
+    public void OnReleaseCurrentFruitWithMouse()
     {
-        ReleaseCurrentFruitWithMouse?.Invoke();
+        ReleaseCurrentFruitWithMouseEvent?.Invoke();
     }
 
-    public void OnMoveLeftRight(bool isLeft)
+    public void OnMoveLeftRightWithKeyBoard(bool isLeft)
     {
-        MoveLeftRightWithKeyBoard?.Invoke(isLeft);
+        MoveLeftRightWithKeyBoardEvent?.Invoke(isLeft);
     }
 
     public void OnLockReleaesCurrentFruit(bool isLock)
     {
-        LockReleaesCurrentFruit?.Invoke(isLock);
+        LockReleaesCurrentFruitEvent?.Invoke(isLock);
     }
 
-    public void OnsetScoreText(int score)
+    public void OnSetScoreText(int score)
     {
-        setScoreText?.Invoke(score);
+        SetScoreTextEvent?.Invoke(score);
     }
 }

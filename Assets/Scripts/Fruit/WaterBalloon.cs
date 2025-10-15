@@ -79,7 +79,7 @@ public class WaterBalloon : MonoBehaviour, PooledObejct
             cwb.isMerging = true;
             twb.isMerging = true;
 
-            ManagerObject.instance.actionManager.OnsetScoreText(++ManagerObject.instance.resourceManager.stageDataSO.Result.Score);
+            ManagerObject.instance.actionManager.OnSetScoreText(++ManagerObject.instance.resourceManager.stageDataSO.Result.Score);
 
             Vector3 midPoint = (c.transform.position + gameObject.transform.position) * 0.5f;
 

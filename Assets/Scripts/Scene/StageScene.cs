@@ -66,9 +66,9 @@ public class StageScene : MonoBehaviour
 
 
 
-                ManagerObject.instance.actionManager.MoveLeftRightWithKeyBoard += moveWithKeyBorad; //키보드 좌우 움직이기 가능
-                ManagerObject.instance.actionManager.LockReleaesCurrentFruit += lockReleaseCurrentFruit; // 과일 놓기 가능
-                ManagerObject.instance.actionManager.ReleaseCurrentFruitWithMouse += releaseCurrentFruitWithMouse; //마우스 클릭으로 놓기 가능
+                ManagerObject.instance.actionManager.MoveLeftRightWithKeyBoardEvent += moveWithKeyBorad; //키보드 좌우 움직이기 가능
+                ManagerObject.instance.actionManager.LockReleaesCurrentFruitEvent += lockReleaseCurrentFruit; // 과일 놓기 가능
+                ManagerObject.instance.actionManager.ReleaseCurrentFruitWithMouseEvent += releaseCurrentFruitWithMouse; //마우스 클릭으로 놓기 가능
                 break;
             case State.Moving:
                 //놓으면 다음 상태로
@@ -83,9 +83,9 @@ public class StageScene : MonoBehaviour
                 break;
             case State.Droping_Start:
                 setState(State.Droping);
-                ManagerObject.instance.actionManager.MoveLeftRightWithKeyBoard -= moveWithKeyBorad;
-                ManagerObject.instance.actionManager.LockReleaesCurrentFruit -= lockReleaseCurrentFruit;
-                ManagerObject.instance.actionManager.ReleaseCurrentFruitWithMouse -= releaseCurrentFruitWithMouse;
+                ManagerObject.instance.actionManager.MoveLeftRightWithKeyBoardEvent -= moveWithKeyBorad;
+                ManagerObject.instance.actionManager.LockReleaesCurrentFruitEvent -= lockReleaseCurrentFruit;
+                ManagerObject.instance.actionManager.ReleaseCurrentFruitWithMouseEvent -= releaseCurrentFruitWithMouse;
                 break;
             case State.Droping:
                 if (currentCoroutine == null)
@@ -103,9 +103,9 @@ public class StageScene : MonoBehaviour
 
     private void OnDestroy()
     {
-        ManagerObject.instance.actionManager.MoveLeftRightWithKeyBoard -= moveWithKeyBorad;
-        ManagerObject.instance.actionManager.LockReleaesCurrentFruit -= lockReleaseCurrentFruit;
-        ManagerObject.instance.actionManager.ReleaseCurrentFruitWithMouse -= releaseCurrentFruitWithMouse;
+        ManagerObject.instance.actionManager.MoveLeftRightWithKeyBoardEvent -= moveWithKeyBorad;
+        ManagerObject.instance.actionManager.LockReleaesCurrentFruitEvent -= lockReleaseCurrentFruit;
+        ManagerObject.instance.actionManager.ReleaseCurrentFruitWithMouseEvent -= releaseCurrentFruitWithMouse;
         ManagerObject.instance.soundManager.StopAudioClip(ManagerObject.instance.resourceManager.bgmMap[Sounds.BGM1].Result);
 
 

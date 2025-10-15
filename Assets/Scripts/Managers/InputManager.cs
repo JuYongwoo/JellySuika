@@ -25,14 +25,14 @@ public class InputManager
 
         if (Input.GetKey(KeyCode.LeftArrow))
         {
-            ManagerObject.instance.actionManager.OnMoveLeftRight(true);
+            ManagerObject.instance.actionManager.OnMoveLeftRightWithKeyBoard(true);
             //들고 있는 과일을 왼쪽으로
         }
 
         if (Input.GetKey(KeyCode.RightArrow))
         {
             //들고 있는 과일을 오른쪽으로
-            ManagerObject.instance.actionManager.OnMoveLeftRight(false);
+            ManagerObject.instance.actionManager.OnMoveLeftRightWithKeyBoard(false);
 
         }
 
