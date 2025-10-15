@@ -20,8 +20,8 @@ public class ScorePanel : MonoBehaviour
     {
 
 
-        ManagerObject.instance.actionManager.SetScoreTextEvent -= setText;
-        ManagerObject.instance.actionManager.SetScoreTextEvent += setText;
+        ManagerObject.instance.actionManager.SetScoreTextEvent -= SetText;
+        ManagerObject.instance.actionManager.SetScoreTextEvent += SetText;
 
         //
         //actionmanager에 바인딩
@@ -32,11 +32,11 @@ public class ScorePanel : MonoBehaviour
 
     private void OnDestroy()
     {
-        ManagerObject.instance.actionManager.SetScoreTextEvent -= setText;
+        ManagerObject.instance.actionManager.SetScoreTextEvent -= SetText;
 
     }
 
-    private void setText(int score)
+    private void SetText(int score)
     {
         ScorePanelObjsMap[ScorePanelObjs.ScoreText].GetComponent<Text>().text = $"Score = {score}";
     }
