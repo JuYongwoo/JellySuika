@@ -1,4 +1,3 @@
-// Path: Scripts/Pool/PoolManager.cs
 using System.Collections.Generic;
 using UnityEngine;
 

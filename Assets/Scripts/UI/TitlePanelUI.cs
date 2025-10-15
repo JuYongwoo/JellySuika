@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class TitlePanelUI : MonoBehaviour
 {
 
-    enum TitlePanelUIObjs
+    private enum TitlePanelUIObjs
     {
         TitlePlayBtn,
         HowToPlayBtn,
@@ -15,7 +15,6 @@ public class TitlePanelUI : MonoBehaviour
     }
 
     private Dictionary<TitlePanelUIObjs, GameObject> titlePanelUIObjMap;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
 
     private void Awake()
     {
@@ -43,11 +42,5 @@ public class TitlePanelUI : MonoBehaviour
 
 
         });
-    }
-
-    // Update is called once per frame
-    private void Update()
-    {
-        
     }
 }
