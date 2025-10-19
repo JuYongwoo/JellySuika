@@ -77,7 +77,7 @@ public class SoundManager
 
     }
 
-    public void StopAudioClip(AudioClip ac)
+    private void StopAudioClip(AudioClip ac)
     {
         if (audioSources.ContainsKey(ac))
         {
@@ -85,7 +85,7 @@ public class SoundManager
         }
     }
 
-    public void StopAllAudioClip()
+    private void StopAllAudioClip()
     {
         foreach (var source in audioSources.Values)
         {
@@ -93,7 +93,7 @@ public class SoundManager
         }
     }
 
-    public void SetMasterVolume(float vol)
+    private void SetMasterVolume(float vol)
     {
         masterVolume = vol;
     }

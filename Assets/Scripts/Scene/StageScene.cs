@@ -106,7 +106,6 @@ public class StageScene : MonoBehaviour
         ManagerObject.instance.actionManager.MoveLeftRightWithKeyBoardEvent -= moveWithKeyBorad;
         ManagerObject.instance.actionManager.LockReleaesCurrentFruitEvent -= lockReleaseCurrentFruit;
         ManagerObject.instance.actionManager.ReleaseCurrentFruitWithMouseEvent -= releaseCurrentFruitWithMouse;
-        ManagerObject.instance.soundManager.StopAudioClip(ManagerObject.instance.resourceManager.bgmMap[Sounds.BGM1].Result);
 
 
     }
