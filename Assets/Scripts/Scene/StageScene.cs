@@ -33,7 +33,7 @@ public class StageScene : MonoBehaviour
 
     private void Start()
     {
-        ManagerObject.instance.soundManager.PlayAudioClip(ManagerObject.instance.resourceManager.bgmMap[Sounds.BGM1].Result, 0.2f, true);
+        ManagerObject.instance.actionManager.OnPlayAudioClip(ManagerObject.instance.resourceManager.bgmMap[Sounds.BGM1].Result, 0.2f, true);
     }
 
 

@@ -88,13 +88,13 @@ public class WaterBalloon : MonoBehaviour, PooledObejct
                 ManagerObject.instance.resourceManager.fruitsInfoMap.TryGetValue(twb.fruitType + 1, out var fr);
                 if (fr.Result != null)
                 {
-                    ManagerObject.instance.soundManager.PlayAudioClip(ManagerObject.instance.resourceManager.sfxMap[SFX.FruitFusion].Result, 0.2f, false);
+                    ManagerObject.instance.actionManager.OnPlayAudioClip(ManagerObject.instance.resourceManager.sfxMap[SFX.FruitFusion].Result, 0.2f, false);
                     ManagerObject.instance.poolManager.Spawn(fr.Result.parentPrefab, midPoint, Quaternion.identity);
                 }
             }
             else
             {
-                ManagerObject.instance.soundManager.PlayAudioClip(ManagerObject.instance.resourceManager.sfxMap[SFX.ScoreGet].Result, 0.2f, false);
+                ManagerObject.instance.actionManager.OnPlayAudioClip(ManagerObject.instance.resourceManager.sfxMap[SFX.ScoreGet].Result, 0.2f, false);
             }
         }
     }

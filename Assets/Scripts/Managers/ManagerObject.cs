@@ -23,10 +23,12 @@ public class ManagerObject : MonoBehaviour
             DontDestroyOnLoad(gameObject);
 
         resourceManager.Init();
+        soundManager.OnStart();
     }
-    void Start()
+
+    private void OnDestroy()
     {
-        
+        soundManager.OnDestroy();
     }
 
     // Update is called once per frame
