@@ -76,7 +76,7 @@ public class WaterBalloon : MonoBehaviour, PooledObejct
             cwb.isMerging = true;
             twb.isMerging = true;
 
-            ManagerObject.instance.actionManager.OnSetScoreText(++ManagerObject.instance.resourceManager.stageDataSO.Result.Score);
+            ManagerObject.instance.eventManager.OnSetScoreText(++ManagerObject.instance.resourceManager.stageDataSO.Result.Score);
 
             Vector3 midPoint = (c.transform.position + gameObject.transform.position) * 0.5f;
 
@@ -88,13 +88,13 @@ public class WaterBalloon : MonoBehaviour, PooledObejct
                 ManagerObject.instance.resourceManager.fruitsInfoMap.TryGetValue(twb.fruitType + 1, out var fr);
                 if (fr.Result != null)
                 {
-                    ManagerObject.instance.actionManager.OnPlayAudioClip(ManagerObject.instance.resourceManager.sfxMap[SFX.FruitFusion].Result, 0.2f, false);
+                    ManagerObject.instance.eventManager.OnPlayAudioClip(ManagerObject.instance.resourceManager.sfxMap[SFX.FruitFusion].Result, 0.2f, false);
                     ManagerObject.instance.poolManager.Spawn(fr.Result.parentPrefab, midPoint, Quaternion.identity);
                 }
             }
             else
             {
-                ManagerObject.instance.actionManager.OnPlayAudioClip(ManagerObject.instance.resourceManager.sfxMap[SFX.ScoreGet].Result, 0.2f, false);
+                ManagerObject.instance.eventManager.OnPlayAudioClip(ManagerObject.instance.resourceManager.sfxMap[SFX.ScoreGet].Result, 0.2f, false);
             }
         }
     }

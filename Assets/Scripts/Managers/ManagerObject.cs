@@ -5,7 +5,7 @@ public class ManagerObject : MonoBehaviour
     public static ManagerObject instance;
     public InputManager inputManager = new InputManager();
     public ResourceManager resourceManager = new ResourceManager();
-    public ActionManager actionManager = new ActionManager();
+    public EventManager eventManager = new EventManager();
     public SoundManager soundManager = new SoundManager();
     public PoolManager poolManager = new PoolManager();
 
@@ -23,7 +23,7 @@ public class ManagerObject : MonoBehaviour
             DontDestroyOnLoad(gameObject);
 
         resourceManager.Init();
-        soundManager.OnStart();
+        soundManager.OnAwake();
     }
 
     private void OnDestroy()

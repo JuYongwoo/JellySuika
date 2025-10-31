@@ -6,6 +6,7 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceLocations;
 
+
 public class Util
 {
 
@@ -29,15 +30,12 @@ public class Util
     {
         var dict = new Dictionary<T1, AsyncOperationHandle<T2>>();
 
-        // 라벨에 해당하는 모든 리소스 위치 가져오기
         IList<IResourceLocation> locations = Addressables.LoadResourceLocationsAsync(label, typeof(T2)).WaitForCompletion();
 
         foreach (var loc in locations)
         {
-            // Address(PrimaryKey)가 곧 Dictionary의 key
             string key = loc.PrimaryKey;
 
-            // 동기 로드
             AsyncOperationHandle<T2> asset = Addressables.LoadAssetAsync<T2>(key);
 
 
@@ -73,7 +71,7 @@ public class Util
         var dict = new Dictionary<TEnum, AsyncOperationHandle<TObject>>();
 
         var locHandle = Addressables.LoadResourceLocationsAsync(label, typeof(TObject));
-        var addressList = locHandle.Result; // ← FIX: 핸들 자체가 아니라 결과 리스트를 써야 함
+        var addressList = locHandle.Result;
 
         if (addressList == null || addressList.Count == 0)
         {
@@ -96,7 +94,7 @@ public class Util
             if (!dict.ContainsKey(e))
             {
                 Debug.LogWarning($"[Util] No matching asset for Enum {enumName} in label {label}");
-                dict[e] = default; // ← FIX: AsyncOperationHandle<T>는 struct라 null 할당 불가
+                dict[e] = default;
             }
         }
         return dict;
@@ -188,7 +186,7 @@ public class Util
     where TObject : UnityEngine.Object
     {
         var dict = new Dictionary<string, TObject>();
-        IEnumerable keys = new[] { commonLabel }; //라벨로 전부 불러와서
+        IEnumerable keys = new[] { commonLabel };
         var locHandle = Addressables.LoadResourceLocationsAsync(keys, Addressables.MergeMode.Intersection, typeof(TObject));
         var locations = locHandle.WaitForCompletion();
 
@@ -197,7 +195,7 @@ public class Util
 
             var assetHandle = Addressables.LoadAssetAsync<TObject>(i);
             var asset = assetHandle.WaitForCompletion();
-            dict.Add(i.PrimaryKey, asset); //불러온 오브젝트들을 맵에 <키값, 오브젝트> 로 대응
+            dict.Add(i.PrimaryKey, asset);
             Addressables.Release(assetHandle);
         }
         Addressables.Release(locHandle);

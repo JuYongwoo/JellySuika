@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class ActionManager
+public class EventManager
 {
 
     public event Action ReleaseCurrentFruitWithMouseEvent;
