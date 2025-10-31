@@ -1,6 +1,10 @@
+using JYW.JellySuika.Managers;
+using JYW.JellySuika.Utils;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+
+namespace JYW.JellySuika.UIs{
 
 public class ScorePanel : MonoBehaviour
 {
@@ -38,7 +42,7 @@ public class ScorePanel : MonoBehaviour
 
     private void SetText(int score)
     {
-        ScorePanelObjsMap[ScorePanelObjs.ScoreText].GetComponent<Text>().text = $"Score = {score}";
+        ScorePanelObjsMap[ScorePanelObjs.ScoreText].GetComponent<Text>().text = $"Score : {score}";
     }
 
 
@@ -47,4 +51,4 @@ public class ScorePanel : MonoBehaviour
     //그 함수를 actionmanager에 -= += 바인딩
     //destory 시 -=로 바인딩 해제
 
-}
+} }

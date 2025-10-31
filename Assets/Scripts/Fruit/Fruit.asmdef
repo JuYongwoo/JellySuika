@@ -1,0 +1,11 @@
+{
+  "name": "Fruit",
+  "references": [
+    "Data",
+    "Managers",
+    "SOs",
+    "Unity.ResourceManager",
+    "Unity.Addressables",
+    "Utils"
+  ]
+}

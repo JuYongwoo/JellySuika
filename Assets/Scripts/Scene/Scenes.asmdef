@@ -1,0 +1,11 @@
+{
+  "name": "Scenes",
+  "references": [
+    "Managers",
+    "Utils",
+    "SOs",
+    "Fruit",
+    "Unity.ResourceManager"
+
+  ]
+}

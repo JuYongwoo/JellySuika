@@ -1,39 +1,42 @@
 using UnityEngine;
 
-public class ManagerObject : MonoBehaviour
+namespace JYW.JellySuika.Managers
 {
-    public static ManagerObject instance;
-    public InputManager inputManager = new InputManager();
-    public ResourceManager resourceManager = new ResourceManager();
-    public EventManager eventManager = new EventManager();
-    public SoundManager soundManager = new SoundManager();
-    public PoolManager poolManager = new PoolManager();
-
-    private void Awake()
+    public class ManagerObject : MonoBehaviour
     {
-        
-        if(instance == null)
+        public static ManagerObject instance;
+        public InputManager inputManager = new InputManager();
+        public ResourceManager resourceManager = new ResourceManager();
+        public EventManager eventManager = new EventManager();
+        public SoundManager soundManager = new SoundManager();
+        public PoolManager poolManager = new PoolManager();
+
+        private void Awake()
         {
-            instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+
+            if (instance == null)
+            {
+                instance = this;
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
             DontDestroyOnLoad(gameObject);
 
-        resourceManager.Init();
-        soundManager.OnAwake();
-    }
+            resourceManager.Init();
+            soundManager.OnAwake();
+        }
 
-    private void OnDestroy()
-    {
-        soundManager.OnDestroy();
-    }
+        private void OnDestroy()
+        {
+            soundManager.OnDestroy();
+        }
 
-    // Update is called once per frame
-    void Update()
-    {
-        inputManager.Update();
+        // Update is called once per frame
+        void Update()
+        {
+            inputManager.Update();
+        }
     }
 }

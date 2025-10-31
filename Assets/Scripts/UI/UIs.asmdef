@@ -1,0 +1,8 @@
+{
+  "name": "UIs",
+  "references": [
+    "Utils",
+    "Data",
+    "Managers"
+  ]
+}

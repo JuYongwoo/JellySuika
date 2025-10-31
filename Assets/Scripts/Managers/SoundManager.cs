@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SoundManager
+namespace JYW.JellySuika.Managers
+{
+    public class SoundManager
 {
     //private Dictionary<Skills, AudioClip> skillSoundsMap;
 
@@ -95,4 +97,5 @@ public class SoundManager
     }
 
 
+}
 }

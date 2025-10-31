@@ -1,8 +1,11 @@
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "StageDataSO", fileName = "StageDataSO")]
-public class StageDataSO : ScriptableObject
+namespace JYW.JellySuika.SOs
 {
-    [HideInInspector]
-    public int Score = 0;
+    [CreateAssetMenu(menuName = "StageDataSO", fileName = "StageDataSO")]
+    public class StageDataSO : ScriptableObject
+    {
+        [HideInInspector]
+        public int Score = 0;
+    }
 }
