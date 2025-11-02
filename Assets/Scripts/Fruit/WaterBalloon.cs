@@ -81,7 +81,7 @@ namespace JYW.JellySuika.Fruit
                 cwb.isMerging = true;
                 twb.isMerging = true;
 
-                ManagerObject.instance.eventManager.OnSetScoreText(++ManagerObject.instance.resourceManager.stageDataSO.Result.Score);
+                ManagerObject.instance.eventManager.OnSetScoreText(++ManagerObject.instance.resourceManager.GetStageDataSO().Score);
 
                 Vector3 midPoint = (c.transform.position + gameObject.transform.position) * 0.5f;
 
@@ -90,16 +90,16 @@ namespace JYW.JellySuika.Fruit
 
                 if ((int)twb.fruitType + 1 < Enum.GetValues(typeof(Fruits)).Length)
                 {
-                    ManagerObject.instance.resourceManager.fruitsInfoMap.TryGetValue(twb.fruitType + 1, out var fr);
-                    if (fr.Result != null)
+                    var fr = ManagerObject.instance.resourceManager.GetFruitInfo(twb.fruitType + 1);
+                    if (fr != null)
                     {
-                        ManagerObject.instance.eventManager.OnPlayAudioClip(ManagerObject.instance.resourceManager.sfxMap[SFX.FruitFusion].Result, 0.2f, false);
-                        ManagerObject.instance.poolManager.Spawn(fr.Result.parentPrefab, midPoint, Quaternion.identity);
+                        ManagerObject.instance.eventManager.OnPlayAudioClip(ManagerObject.instance.resourceManager.GetSFX(SFX.FruitFusion), 0.2f, false);
+                        ManagerObject.instance.poolManager.Spawn(fr.parentPrefab, midPoint, Quaternion.identity);
                     }
                 }
                 else
                 {
-                    ManagerObject.instance.eventManager.OnPlayAudioClip(ManagerObject.instance.resourceManager.sfxMap[SFX.ScoreGet].Result, 0.2f, false);
+                    ManagerObject.instance.eventManager.OnPlayAudioClip(ManagerObject.instance.resourceManager.GetSFX(SFX.ScoreGet), 0.2f, false);
                 }
             }
         }
@@ -184,7 +184,7 @@ namespace JYW.JellySuika.Fruit
             for (int i = transform.childCount - 1; i >= 0; i--) Destroy(transform.GetChild(i).gameObject);
             rbs.Clear(); sensors.Clear();
 
-            nodePrefab = ManagerObject.instance.resourceManager.fruitsInfoMap[fruitType].Result.childPrefab;
+            nodePrefab = ManagerObject.instance.resourceManager.GetFruitInfo(fruitType).childPrefab;
 
             float R = Mathf.Max(0.001f, nodePrefab.transform.localScale.x);
 
@@ -352,15 +352,10 @@ namespace JYW.JellySuika.Fruit
         IEnumerator SetupSpriteAndBuild()
         {
             var wb = GetComponent<WaterBalloon>();
-            while (ManagerObject.instance == null ||
-                   ManagerObject.instance.resourceManager == null ||
-                   wb == null ||
-                   !ManagerObject.instance.resourceManager.fruitsInfoMap.ContainsKey(wb.fruitType) ||
-                   ManagerObject.instance.resourceManager.fruitsInfoMap[wb.fruitType].Result == null)
+            while (ManagerObject.instance.resourceManager.GetFruitInfo(wb.fruitType) == null)
                 yield return null;
 
-            sprite = ManagerObject.instance.resourceManager
-                        .fruitsInfoMap[wb.fruitType].Result.fruitSprite;
+            sprite = ManagerObject.instance.resourceManager.GetFruitInfo(wb.fruitType).fruitSprite;
 
             ApplySpriteToMaterial();
             RefreshNodes();

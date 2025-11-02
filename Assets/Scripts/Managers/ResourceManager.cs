@@ -11,10 +11,10 @@ namespace JYW.JellySuika.Managers
 
     public class ResourceManager
     {
-        public Dictionary<Fruits, AsyncOperationHandle<FruitDataSO>> fruitsInfoMap;
-        public Dictionary<Sounds, AsyncOperationHandle<AudioClip>> bgmMap;
-        public Dictionary<SFX, AsyncOperationHandle<AudioClip>> sfxMap;
-        public AsyncOperationHandle<StageDataSO> stageDataSO;
+        private Dictionary<Fruits, AsyncOperationHandle<FruitDataSO>> fruitsInfoMap;
+        private Dictionary<Sounds, AsyncOperationHandle<AudioClip>> bgmMap;
+        private Dictionary<SFX, AsyncOperationHandle<AudioClip>> sfxMap;
+        private AsyncOperationHandle<StageDataSO> stageDataSO;
 
         public void Init() //게임 시작과 동시에 비동기 로드 시작
         {
@@ -23,6 +23,25 @@ namespace JYW.JellySuika.Managers
             bgmMap = Util.LoadDictWithEnum<Sounds, AudioClip>();
             sfxMap = Util.LoadDictWithEnum<SFX, AudioClip>();
             stageDataSO = Addressables.LoadAssetAsync<StageDataSO>("StageDataSO");
+        }
+
+        public FruitDataSO GetFruitInfo(Fruits fruit)
+        {
+            return fruitsInfoMap[fruit].Result;
+        }
+        public AudioClip GetBGM(Sounds sound)
+        {
+            return bgmMap[sound].Result;
+        }
+
+        public AudioClip GetSFX(SFX sfx)
+        {
+            return sfxMap[sfx].Result;
+        }
+
+        public StageDataSO GetStageDataSO()
+        {
+            return stageDataSO.Result;
         }
 
     }

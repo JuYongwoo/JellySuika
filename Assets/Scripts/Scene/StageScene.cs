@@ -36,7 +36,7 @@ namespace JYW.JellySuika.Scenes
 
         private void Start()
         {
-            ManagerObject.instance.eventManager.OnPlayAudioClip(ManagerObject.instance.resourceManager.bgmMap[Sounds.BGM1].Result, 0.2f, true);
+            ManagerObject.instance.eventManager.OnPlayAudioClip(ManagerObject.instance.resourceManager.GetBGM(Sounds.BGM1), 0.2f, true);
         }
 
 
@@ -55,7 +55,7 @@ namespace JYW.JellySuika.Scenes
                     //위에 생성하고
 
                     Fruits fr = fruitQueue.Dequeue();
-                    currentFruit = ManagerObject.instance.poolManager.Spawn(ManagerObject.instance.resourceManager.fruitsInfoMap[fr].Result.parentPrefab, new Vector2(0, height), new Quaternion());
+                    currentFruit = ManagerObject.instance.poolManager.Spawn(ManagerObject.instance.resourceManager.GetFruitInfo(fr).parentPrefab, new Vector2(0, height), new Quaternion());
                     //currentFruit = Instantiate(ManagerObject.instance.resourceManager.fruitsInfoMap[fr].Result.parentPrefab, new Vector2(0, height), new Quaternion());
                     currentFruit.GetComponent<WaterBalloon>().setGravity(false);
                     isLocked = true;
