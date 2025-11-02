@@ -6,6 +6,7 @@
     "SOs",
     "Unity.ResourceManager",
     "Unity.Addressables",
-    "Utils"
+    "Utils",
+    "Commons"
   ]
 }

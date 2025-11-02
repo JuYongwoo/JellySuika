@@ -1,3 +1,4 @@
+using JYW.JellySuika.Common;
 using JYW.JellySuika.SOs;
 using JYW.JellySuika.Utils;
 using System.Collections.Generic;
@@ -7,27 +8,6 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace JYW.JellySuika.Managers
 {
-    public enum Fruits
-    {
-        Berry,
-        Orange,
-        Grape,
-        Apple,
-        Melon,
-        Suika,
-
-    }
-
-    public enum Sounds
-    {
-        BGM1
-    }
-
-    public enum SFX
-    {
-        FruitFusion,
-        ScoreGet
-    }
 
     public class ResourceManager
     {

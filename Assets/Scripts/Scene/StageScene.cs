@@ -1,5 +1,6 @@
 using JYW.JellySuika.Fruit;
 using JYW.JellySuika.Managers;
+using JYW.JellySuika.Common;
 using System;
 using System.Collections;
 using System.Collections.Generic;

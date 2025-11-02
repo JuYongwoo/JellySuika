@@ -5,7 +5,8 @@
     "Utils",
     "SOs",
     "Fruit",
-    "Unity.ResourceManager"
+    "Unity.ResourceManager",
+    "Commons"
 
   ]
 }
