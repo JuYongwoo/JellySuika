@@ -1,7 +1,0 @@
-{
-  "name": "Utils",
-  "references": [
-    "Unity.Addressables",
-    "Unity.ResourceManager"
-  ]
-}

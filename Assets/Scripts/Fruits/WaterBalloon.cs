@@ -1,4 +1,4 @@
-using JYW.JellySuika.Common;
+using JYW.JellySuika.Commons;
 using JYW.JellySuika.Managers;
 using System;
 using System.Collections;
@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SocialPlatforms;
 
-namespace JYW.JellySuika.Fruit
+namespace JYW.JellySuika.Fruits
 {
 
     [DisallowMultipleComponent]
@@ -44,7 +44,7 @@ namespace JYW.JellySuika.Fruit
         private float minRadius;
         private float maxRadius;
 
-        public Fruits fruitType;
+        public Commons.Fruits fruitType;
         public bool isMerging = false;
 
         public string shaderName = "Sprites/Default";
@@ -88,7 +88,7 @@ namespace JYW.JellySuika.Fruit
                 ManagerObject.instance.poolManager.DestroyPooled(cwb.gameObject);
                 ManagerObject.instance.poolManager.DestroyPooled(twb.gameObject);
 
-                if ((int)twb.fruitType + 1 < Enum.GetValues(typeof(Fruits)).Length)
+                if ((int)twb.fruitType + 1 < Enum.GetValues(typeof(Commons.Fruits)).Length)
                 {
                     var fr = ManagerObject.instance.resourceManager.GetFruitInfo(twb.fruitType + 1);
                     if (fr != null)

@@ -1,0 +1,12 @@
+{
+  "name": "JYW.JellySuika.Fruits",
+  "references": [
+    "JYW.JellySuika.Data",
+    "JYW.JellySuika.Managers",
+    "JYW.JellySuika.SOs",
+    "Unity.ResourceManager",
+    "Unity.Addressables",
+    "JYW.JellySuika.Utils",
+    "JYW.JellySuika.Commons"
+  ]
+}

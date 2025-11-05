@@ -1,4 +1,4 @@
-namespace JYW.JellySuika.Common
+namespace JYW.JellySuika.Commons
 {
     public enum Fruits
     {

@@ -1,0 +1,10 @@
+{
+  "name": "JYW.JellySuika.Managers",
+  "references": [
+    "JYW.JellySuika.Utils",
+    "JYW.JellySuika.SOs",
+    "Unity.Addressables",
+    "Unity.ResourceManager",
+    "JYW.JellySuika.Commons"
+  ]
+}

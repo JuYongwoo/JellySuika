@@ -1,0 +1,12 @@
+{
+  "name": "JYW.JellySuika.Scenes",
+  "references": [
+    "JYW.JellySuika.Managers",
+    "JYW.JellySuika.Utils",
+    "JYW.JellySuika.SOs",
+    "JYW.JellySuika.Fruits",
+    "Unity.ResourceManager",
+    "JYW.JellySuika.Commons"
+
+  ]
+}

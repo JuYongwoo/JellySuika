@@ -1,6 +1,6 @@
-using JYW.JellySuika.Fruit;
+using JYW.JellySuika.Fruits;
 using JYW.JellySuika.Managers;
-using JYW.JellySuika.Common;
+using JYW.JellySuika.Commons;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -20,7 +20,7 @@ namespace JYW.JellySuika.Scenes
             Droping_End,
         }
 
-        private Queue<Fruits> fruitQueue = new Queue<Fruits>(new[] { Fruits.Berry });
+        private Queue<Commons.Fruits> fruitQueue = new Queue<Commons.Fruits>(new[] { Commons.Fruits.Berry });
         private GameObject currentFruit;
         private State gameState = State.Moving_Start;
         private const float height = 3.8f;
@@ -54,7 +54,7 @@ namespace JYW.JellySuika.Scenes
 
                     //위에 생성하고
 
-                    Fruits fr = fruitQueue.Dequeue();
+                    Commons.Fruits fr = fruitQueue.Dequeue();
                     currentFruit = ManagerObject.instance.poolManager.Spawn(ManagerObject.instance.resourceManager.GetFruitInfo(fr).parentPrefab, new Vector2(0, height), new Quaternion());
                     //currentFruit = Instantiate(ManagerObject.instance.resourceManager.fruitsInfoMap[fr].Result.parentPrefab, new Vector2(0, height), new Quaternion());
                     currentFruit.GetComponent<WaterBalloon>().setGravity(false);
@@ -64,7 +64,7 @@ namespace JYW.JellySuika.Scenes
                     //리스트 추가
                     while (fruitQueue.Count < listSize)
                     {
-                        fruitQueue.Enqueue(Enum.Parse<Fruits>(UnityEngine.Random.Range(0, (int)Fruits.Melon).ToString()));
+                        fruitQueue.Enqueue(Enum.Parse<Commons.Fruits>(UnityEngine.Random.Range(0, (int)Commons.Fruits.Melon).ToString()));
                     }
 
 
