@@ -3,30 +3,30 @@ using UnityEngine;
 
 namespace JYW.JellySuika.Managers
 {
-    public class SoundManager
-{
+    public class SoundManager : Singleton<SoundManager>
+    {
     //private Dictionary<Skills, AudioClip> skillSoundsMap;
 
     private Dictionary<AudioClip, AudioSource> audioSources = new Dictionary<AudioClip, AudioSource>();
     private float masterVolume = 1f;
 
-    public void OnAwake()
+    private void Start()
     {
-        ManagerObject.instance.eventManager.PlayAudioClipEvent -= PlayAudioClip;
-        ManagerObject.instance.eventManager.PlayAudioClipEvent += PlayAudioClip;
-        ManagerObject.instance.eventManager.StopAudioClipEvent -= StopAudioClip;
-        ManagerObject.instance.eventManager.StopAudioClipEvent += StopAudioClip;
-        ManagerObject.instance.eventManager.StopAllAudioClipEvent -= StopAllAudioClip;
-        ManagerObject.instance.eventManager.StopAllAudioClipEvent += StopAllAudioClip;
-        ManagerObject.instance.eventManager.SetMasterVolumeEvent -= SetMasterVolume;
-        ManagerObject.instance.eventManager.SetMasterVolumeEvent += SetMasterVolume;
+        EventManager.Instance.PlayAudioClipEvent -= PlayAudioClip;
+        EventManager.Instance.PlayAudioClipEvent += PlayAudioClip;
+        EventManager.Instance.StopAudioClipEvent -= StopAudioClip;
+        EventManager.Instance.StopAudioClipEvent += StopAudioClip;
+        EventManager.Instance.StopAllAudioClipEvent -= StopAllAudioClip;
+        EventManager.Instance.StopAllAudioClipEvent += StopAllAudioClip;
+        EventManager.Instance.SetMasterVolumeEvent -= SetMasterVolume;
+        EventManager.Instance.SetMasterVolumeEvent += SetMasterVolume;
     }
-    public void OnDestroy()
+    private void OnDestroy()
     {
-        ManagerObject.instance.eventManager.PlayAudioClipEvent -= PlayAudioClip;
-        ManagerObject.instance.eventManager.StopAudioClipEvent -= StopAudioClip;
-        ManagerObject.instance.eventManager.StopAllAudioClipEvent -= StopAllAudioClip;
-        ManagerObject.instance.eventManager.SetMasterVolumeEvent -= SetMasterVolume;
+        EventManager.Instance.PlayAudioClipEvent -= PlayAudioClip;
+        EventManager.Instance.StopAudioClipEvent -= StopAudioClip;
+        EventManager.Instance.StopAllAudioClipEvent -= StopAllAudioClip;
+        EventManager.Instance.SetMasterVolumeEvent -= SetMasterVolume;
 
     }
 
@@ -52,7 +52,7 @@ namespace JYW.JellySuika.Managers
             }
             else
             {
-                var src = ManagerObject.instance.gameObject.AddComponent<AudioSource>();
+                var src = gameObject.AddComponent<AudioSource>();
                 src.playOnAwake = false;
                 src.spatialBlend = 0f;
                 src.priority = 128;

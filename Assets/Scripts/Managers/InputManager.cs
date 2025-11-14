@@ -2,9 +2,9 @@ using UnityEngine;
 
 namespace JYW.JellySuika.Managers
 {
-    public class InputManager
+    public class InputManager : Singleton<InputManager>
     {
-        public void Update()
+        private void Update()
         {
 
 
@@ -20,20 +20,20 @@ namespace JYW.JellySuika.Managers
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 //들고 있는 과일을 놓는다.
-                ManagerObject.instance.eventManager.OnLockReleaesCurrentFruit(false);
+                EventManager.Instance.OnLockReleaesCurrentFruit(false);
 
             }
 
             if (Input.GetKey(KeyCode.LeftArrow))
             {
-                ManagerObject.instance.eventManager.OnMoveLeftRightWithKeyBoard(true);
+                EventManager.Instance.OnMoveLeftRightWithKeyBoard(true);
                 //들고 있는 과일을 왼쪽으로
             }
 
             if (Input.GetKey(KeyCode.RightArrow))
             {
                 //들고 있는 과일을 오른쪽으로
-                ManagerObject.instance.eventManager.OnMoveLeftRightWithKeyBoard(false);
+                EventManager.Instance.OnMoveLeftRightWithKeyBoard(false);
 
             }
 

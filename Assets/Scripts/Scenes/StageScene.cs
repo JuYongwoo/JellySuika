@@ -36,7 +36,7 @@ namespace JYW.JellySuika.Scenes
 
         private void Start()
         {
-            ManagerObject.instance.eventManager.OnPlayAudioClip(ManagerObject.instance.resourceManager.GetBGM(Sounds.BGM1), 0.2f, true);
+            EventManager.Instance.OnPlayAudioClip(ResourceManager.Instance.GetBGM(Sounds.BGM1), 0.2f, true);
         }
 
 
@@ -55,8 +55,8 @@ namespace JYW.JellySuika.Scenes
                     //위에 생성하고
 
                     Commons.Fruits fr = fruitQueue.Dequeue();
-                    currentFruit = ManagerObject.instance.poolManager.Spawn(ManagerObject.instance.resourceManager.GetFruitInfo(fr).parentPrefab, new Vector2(0, height), new Quaternion());
-                    //currentFruit = Instantiate(ManagerObject.instance.resourceManager.fruitsInfoMap[fr].Result.parentPrefab, new Vector2(0, height), new Quaternion());
+                    currentFruit = PoolManager.Instance.Spawn(ResourceManager.Instance.GetFruitInfo(fr).parentPrefab, new Vector2(0, height), new Quaternion());
+                    //currentFruit = Instantiate(ResourceManager.Instance.fruitsInfoMap[fr].Result.parentPrefab, new Vector2(0, height), new Quaternion());
                     currentFruit.GetComponent<WaterBalloon>().setGravity(false);
                     isLocked = true;
 
@@ -69,9 +69,9 @@ namespace JYW.JellySuika.Scenes
 
 
 
-                    ManagerObject.instance.eventManager.MoveLeftRightWithKeyBoardEvent += MoveWithKeyBorad; //키보드 좌우 움직이기 가능
-                    ManagerObject.instance.eventManager.LockReleaesCurrentFruitEvent += LockReleaseCurrentFruit; // 과일 놓기 가능
-                    ManagerObject.instance.eventManager.ReleaseCurrentFruitWithMouseEvent += ReleaseCurrentFruitWithMouse; //마우스 클릭으로 놓기 가능
+                    EventManager.Instance.MoveLeftRightWithKeyBoardEvent += MoveWithKeyBorad; //키보드 좌우 움직이기 가능
+                    EventManager.Instance.LockReleaesCurrentFruitEvent += LockReleaseCurrentFruit; // 과일 놓기 가능
+                    EventManager.Instance.ReleaseCurrentFruitWithMouseEvent += ReleaseCurrentFruitWithMouse; //마우스 클릭으로 놓기 가능
                     break;
                 case State.Moving:
                     //놓으면 다음 상태로
@@ -86,9 +86,9 @@ namespace JYW.JellySuika.Scenes
                     break;
                 case State.Droping_Start:
                     SetState(State.Droping);
-                    ManagerObject.instance.eventManager.MoveLeftRightWithKeyBoardEvent -= MoveWithKeyBorad;
-                    ManagerObject.instance.eventManager.LockReleaesCurrentFruitEvent -= LockReleaseCurrentFruit;
-                    ManagerObject.instance.eventManager.ReleaseCurrentFruitWithMouseEvent -= ReleaseCurrentFruitWithMouse;
+                    EventManager.Instance.MoveLeftRightWithKeyBoardEvent -= MoveWithKeyBorad;
+                    EventManager.Instance.LockReleaesCurrentFruitEvent -= LockReleaseCurrentFruit;
+                    EventManager.Instance.ReleaseCurrentFruitWithMouseEvent -= ReleaseCurrentFruitWithMouse;
                     break;
                 case State.Droping:
                     if (currentCoroutine == null)
@@ -106,9 +106,9 @@ namespace JYW.JellySuika.Scenes
 
         private void OnDestroy()
         {
-            ManagerObject.instance.eventManager.MoveLeftRightWithKeyBoardEvent -= MoveWithKeyBorad;
-            ManagerObject.instance.eventManager.LockReleaesCurrentFruitEvent -= LockReleaseCurrentFruit;
-            ManagerObject.instance.eventManager.ReleaseCurrentFruitWithMouseEvent -= ReleaseCurrentFruitWithMouse;
+            EventManager.Instance.MoveLeftRightWithKeyBoardEvent -= MoveWithKeyBorad;
+            EventManager.Instance.LockReleaesCurrentFruitEvent -= LockReleaseCurrentFruit;
+            EventManager.Instance.ReleaseCurrentFruitWithMouseEvent -= ReleaseCurrentFruitWithMouse;
 
 
         }

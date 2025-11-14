@@ -9,14 +9,14 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 namespace JYW.JellySuika.Managers
 {
 
-    public class ResourceManager
+    public class ResourceManager : Singleton<ResourceManager>
     {
         private Dictionary<Fruits, AsyncOperationHandle<FruitDataSO>> fruitsInfoMap;
         private Dictionary<Sounds, AsyncOperationHandle<AudioClip>> bgmMap;
         private Dictionary<SFX, AsyncOperationHandle<AudioClip>> sfxMap;
         private AsyncOperationHandle<StageDataSO> stageDataSO;
 
-        public void Init() //게임 시작과 동시에 비동기 로드 시작
+        private void Start() //게임 시작과 동시에 비동기 로드 시작
         {
 
             fruitsInfoMap = Util.LoadDictWithEnum<Fruits, FruitDataSO>();

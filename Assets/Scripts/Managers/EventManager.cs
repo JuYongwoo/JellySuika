@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace JYW.JellySuika.Managers
 {
-    public class EventManager
+    public class EventManager : Singleton<EventManager>
     {
 
         public event Action ReleaseCurrentFruitWithMouseEvent;

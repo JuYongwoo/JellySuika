@@ -9,7 +9,7 @@ namespace JYW.JellySuika.Managers
         public abstract void PoolStart();
     }
 
-    public class PoolManager
+    public class PoolManager : Singleton<PoolManager>
     {
         private Dictionary<GameObject, Queue<GameObject>> _pools = new();
         private Dictionary<GameObject, GameObject> _instanceToPrefab = new();
